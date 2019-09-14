@@ -7,9 +7,8 @@ import pprint
 import datetime
 import copy
 
-def dump_aps(interface):
+def dump_aps(interface, timeout):
     table = ''
-    timeout = 1
 
     table_start = re.compile('\sCH')
     line_start = re.compile('[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}')
@@ -30,6 +29,8 @@ def dump_aps(interface):
                 accumulator[line[0]] = []
 
             accumulator[line[0]].append([line[1], line[-1], line[5]])
+
+
 
     final = {}
 

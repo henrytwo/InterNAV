@@ -24,17 +24,20 @@ class RefPoint:
         tot = 0
         n = 0
         #sig is mac address
-        print(locList)
-        print(self.signalList)
+        #print(locList)
+        #print(self.signalList)
+        errs = []
         for sig in set(locList.keys()) | set(self.signalList.keys()):
             if sig not in self.signalList.keys():
-                tot += abs(110-locList[sig])
+                errs.append(abs(110-locList[sig]))
             elif sig not in locList.keys():
-                tot += abs(110-self.signalList[sig])
+                errs.append(abs(110-self.signalList[sig]))
             else:
-                tot += abs(self.signalList[sig]-locList[sig])
+                errs.append(abs(self.signalList[sig]-locList[sig]))
             n += 1
-        return tot/n
+        errs.sort()
+        tot = sum(errs[:3])
+        return tot/3
 
 
 
@@ -57,13 +60,22 @@ def Initialize(rp, fp, sc, pairs):
     w = 0
     pairToIndex = {}
     for k in rp.keys():
-        refPoints.append(RefPoint(w, rp[k]["aps"], rp[k]["location"]))
+        aps = []
+        for a in rp[k]["aps"].keys():
+            aps.append([abs(rp[k]["aps"][a]), a])
+            if aps[-1][0] == 1:
+                aps[-1][0] = 120
+        aps.sort()
+        apd = {}
+        for _ in range(5):
+            apd[aps[_][1]] = aps[_][0]
+        refPoints.append(RefPoint(w, apd, rp[k]["location"]))
         pairToIndex[k] = w
         w += 1
 
     #Make edges list
     edges = []
-    for i in range(pairs):
+    for i in range(len(pairs)):
         edges.append((pairToIndex[pairs[0]], pairToIndex[pairs[1]]))
         
 
@@ -86,21 +98,47 @@ def Initialize(rp, fp, sc, pairs):
 #This is your current location signals to each AP
 #locSigs = {1:(1, 1), 2:(3, 5), 4:(9, 2)}
 
-def findLocation(locSigs):
-    nodeBreadth = 2 #Number of nodes whose paths are being checked
-
-    #Gets nodes whose avg error / AP signal are lowest
+def findLocation(abd):
+    aps = []
+    for a in abd.keys():
+        aps.append([abs(abd[a]), a])
+        if abd[a] == 1:
+            aps[-1][0] = 120
+    aps.sort()
+    locSigs = {}
+    for _ in range(5):
+        locSigs[aps[_][1]] = aps[_][0]
+##############
     temp = []
-    for r in refPoints:
-        temp.append((r.getError(locSigs), r.ID, r.pos))
-    temp.sort()
-    topNodeIDs = temp[:nodeBreadth]
+    for e in pairs:
+        a = refPoints[e[0]]
+        b = refPoints[e[1]]
+        tot = a.getError(locSigs)+b.getError(locSigs)
+        temp.append((tot, a.ID, b.ID, a.pos, b.pos))
 
-    pointA = topNodeIDs[0][2]
-    pointB = topNodeIDs[1][2]
-    totError = topNodeIDs[0][0] + topNodeIDs[1][0]+2
-    curLocation = (pointA[0] + pointB[0]*((topNodeIDs[0][0]+1)/totError), pointA[1] + pointB[1]*((topNodeIDs[0][0]+1)/totError))
-    closestNode = topNodeIDs[0]
+    topNodeIDs = min(temp)
+    pointA = topNodeIDs[1]
+    pointB = topNodeIDs[2]
+    totError = topNodeIDs[0]+2
+    x = topNodeIDs[3]
+    y = topNodeIDs[4]
+    curLocation = (x[0] + (y[0]-x[0])*((pointA.getError(locSigs)+1)/totError), x[1] + (y[1]-x[1])*((pointA.getError(locSigs)+1)/totError))
+    closestNode = topNodeIDs[3]
+##############    
+##    nodeBreadth = 2 #Number of nodes whose paths are being checked
+##
+##    #Gets nodes whose avg error / AP signal are lowest
+##    temp = []
+##    for r in refPoints:
+##        temp.append((r.getError(locSigs), r.ID, r.pos))
+##    temp.sort()
+##    topNodeIDs = temp[:nodeBreadth]
+##
+##    pointA = topNodeIDs[0][2]
+##    pointB = topNodeIDs[1][2]
+##    totError = topNodeIDs[0][0] + topNodeIDs[1][0]+2
+##    curLocation = (pointA[0] + (pointB[0]-pointA[0])*((topNodeIDs[0][0]+1)/totError), pointA[1] + (pointB[1]-pointA[1])*((topNodeIDs[0][0]+1)/totError))
+##    closestNode = topNodeIDs[0]
     
     return curLocation
 
@@ -108,7 +146,7 @@ def findLocation(locSigs):
 
 #Destination should be a ref point ID
 def getPath(destination):
-    lineSegList = [(closestNode[2], curLocation)]
+    lineSegList = [(closestNode, curLocation)]
     dists = [(99999, []) for i in range(refCount)]
     dists[closestNode[1]] = (0, [])
     points = Queue()
