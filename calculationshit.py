@@ -26,15 +26,18 @@ class RefPoint:
         #sig is mac address
         #print(locList)
         #print(self.signalList)
+        errs = []
         for sig in set(locList.keys()) | set(self.signalList.keys()):
             if sig not in self.signalList.keys():
-                tot += abs(110-locList[sig])
+                errs.append(abs(110-locList[sig]))
             elif sig not in locList.keys():
-                tot += abs(110-self.signalList[sig])
+                errs.append(abs(110-self.signalList[sig]))
             else:
-                tot += abs(self.signalList[sig]-locList[sig])
+                errs.append(abs(self.signalList[sig]-locList[sig]))
             n += 1
-        return tot/n
+        errs.sort()
+        tot = sum(errs[:3])
+        return tot/3
 
 
 
@@ -64,7 +67,7 @@ def Initialize(rp, fp, sc, pairs):
                 aps[-1][0] = 120
         aps.sort()
         apd = {}
-        for _ in range(3):
+        for _ in range(5):
             apd[aps[_][1]] = aps[_][0]
         refPoints.append(RefPoint(w, apd, rp[k]["location"]))
         pairToIndex[k] = w
@@ -103,7 +106,7 @@ def findLocation(abd):
             aps[-1][0] = 120
     aps.sort()
     locSigs = {}
-    for _ in range(3):
+    for _ in range(5):
         locSigs[aps[_][1]] = aps[_][0]
 ##############
     temp = []
