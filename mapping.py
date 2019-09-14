@@ -8,9 +8,7 @@ import firebase_admin
 from firebase_admin import credentials
 
 
-def draw_screen():
-    cred = credentials.Certificate('firebase_key.json')
-    firebase_admin.initialize_app(cred)
+def draw_shit():
 
     init()
 
@@ -112,8 +110,6 @@ def draw_screen():
                             my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
                             points.append([mx, my])
 
-                            firebase_manager.set_nodes(points)
-
                     else:
                         print(minpoint)
                         pos[0] += screen_size[0] // 2 - int(new_map_img.get_width() * minpoint[0])
@@ -210,7 +206,8 @@ def draw_screen():
 
 
 if __name__ == '__main__':
-    draw_screen()
 
     cred = credentials.Certificate('firebase_key.json')
     firebase_admin.initialize_app(cred)
+
+    draw_shit()
