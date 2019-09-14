@@ -1,6 +1,6 @@
 from mapping_util import *
 from pygame import *
-from math import *
+from math import hypot
 import firebase_manager
 import datetime
 import copy
@@ -24,15 +24,8 @@ def draw_shit():
 
     def center(p):
         nonlocal pos, new_map_rect
-        final_pos = [pos[0] + screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0])),
-                     pos[1] + screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1]))]
-
-        while pos != final_pos:
-            # pos[0] += screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0]))
-            # pos[1] += screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1]))
-            pos[0] += ceil((final_pos[0] - pos[0]) / 2)
-            pos[1] += ceil((final_pos[1] - pos[1]) / 2)
-
+        pos[0] += screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0]))
+        pos[1] += screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1]))
         new_map_rect.topleft = pos
 
     def update_map():
@@ -60,7 +53,7 @@ def draw_shit():
     angle = 0
     pos = [0, 0]
 
-    mode = 'viewing'
+    mode = 'data'
 
     # MODES
     # 1 - Viewing map and getting location
