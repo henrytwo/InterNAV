@@ -11,7 +11,7 @@ from datetime import datetime
 cred = credentials.Certificate('firebase_key.json')
 firebase_admin.initialize_app(cred)
 
-calculationshit.Initialize(firebase_manager.get_node_data(), None, None, firebase_manager.get_edges())
+calculationshit.Initialize(firebase_manager.get_node_data(), None, None, firebase_manager.get_edges(), firebase_manager.get_nodes())
 
 while True:
 

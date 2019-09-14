@@ -6,10 +6,21 @@ from datetime import datetime
 import uuid
 
 def get_nodes():
-    return firebase_admin.firestore.client(app=None) \
+    thing = firebase_admin.firestore.client(app=None) \
         .collection('map') \
         .document('nodes') \
         .get().to_dict()
+
+    """
+    ok dis return this shit
+    
+    {
+        "index shit of the node": [
+            x, y
+        }, ...
+    }
+    
+    """
 
 def get_edges():
     edges = firebase_admin.firestore.client(app=None) \
