@@ -20,6 +20,8 @@ angle = 0
 pos = [0, 0]
 
 new_map_img = transform.rotozoom(map_img, angle, screen_zoom * manual_zoom)
+new_map_rect = new_map_img.get_rect()
+new_map_rect.topleft = pos
 dot_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
 
 click_and_drag = False
@@ -37,7 +39,7 @@ while True:
 
         elif e.type == MOUSEBUTTONUP:
             if e.button == 1:
-                if not click_and_drag:
+                if not click_and_drag and new_map_rect.collidepoint(e.pos):
                     mx, my = e.pos
                     mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
                     my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
@@ -49,6 +51,8 @@ while True:
                     pos[0] -= int((abs(e.pos[0]) / img_w) * p_w)
                     pos[1] -= int((abs(e.pos[1]) / img_h) * p_h)
                     new_map_img = transform.rotozoom(map_img, angle, screen_zoom * manual_zoom)
+                    new_map_rect.size = new_map_img.get_size()
+                    new_map_rect.topleft = pos
                     dot_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
 
             elif e.button == 5:
@@ -57,25 +61,34 @@ while True:
                     pos[0] += int((abs(e.pos[0]) / img_w) * p_w)
                     pos[1] += int((abs(e.pos[1]) / img_h) * p_h)
                     new_map_img = transform.rotozoom(map_img, angle, screen_zoom * manual_zoom)
+                    new_map_rect.size = new_map_img.get_size()
+                    new_map_rect.topleft = pos
                     dot_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
 
             clicked = False
             click_and_drag = False
         elif e.type == MOUSEMOTION:
             if mb[0]:
+                click_and_drag = True
                 pos[0] += e.rel[0]
                 pos[1] += e.rel[1]
-                click_and_drag = True
+                new_map_rect.topleft = pos
 
         elif e.type == VIDEORESIZE:
-            screen_size = e.size
+            screen_size[0] = max(800, e.size[0])
+            screen_size[1] = max(600, e.size[1])
             screen_zoom = get_zoom(map_img, *screen_size)
             new_map_img = transform.rotozoom(map_img, angle, screen_zoom * manual_zoom)
+            new_map_rect.size = new_map_img.get_size()
+            new_map_rect.topleft = pos
             dot_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
             display.set_mode(screen_size, RESIZABLE)
 
     else:
         screen.fill((0, 0, 0))
+        pos[0] = max(min(pos[0], new_map_img.get_width()-160), 160-new_map_img.get_width())
+        pos[1] = max(min(pos[1], new_map_img.get_height()-160), 160-new_map_img.get_height())
+
         screen.blit(new_map_img, pos)
         for rx, ry in points:
             draw.circle(dot_surf, (255, 0, 0), (int(new_map_img.get_width() * rx), int(new_map_img.get_height() * ry)), 5)
