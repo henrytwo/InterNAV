@@ -12,12 +12,15 @@ import calculationshit
 
 def draw_shit():
     def firebase_sync():
+        global last_synced, unsaved_changes
+
         print('FIREBASE SYNCED!')
 
         last_synced = str(datetime.datetime.now())
         unsaved_changes = False
 
         firebase_manager.set_nodes(points)
+        firebase_manager.set_edge(edges)
 
     def center(p):
         nonlocal pos, new_map_rect
@@ -50,7 +53,7 @@ def draw_shit():
     angle = 0
     pos = [0, 0]
 
-    mode = 'viewing'
+    mode = 'data'
 
     # MODES
     # 1 - Viewing map and getting location
@@ -67,7 +70,7 @@ def draw_shit():
 
     points = firebase_manager.get_nodes()
 
-    edges = []
+    edges =  firebase_manager.get_edges()
     current_edge = []
 
     if not points:
@@ -123,10 +126,19 @@ def draw_shit():
                             int(new_map_img.get_width() * minpoint[0]),
                             int(new_map_img.get_height() * minpoint[1])), 5)
 
+                        hitlist = []
+
+                        for i in edges:
+                            if minpoint in i:
+                                hitlist.append(i)
+
+                        for z in hitlist:
+                            edges.remove(z)
+
                     unsaved_changes = True
 
             elif e.type == MOUSEBUTTONUP:
-                if e.button in [1, 2]:
+                if e.button in [1, 2] and mode == 'data':
                     mx, my = e.pos
                     mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
                     my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
@@ -279,6 +291,16 @@ def draw_shit():
 
             screen.blit(new_map_img, pos)
 
+            for id1, id2 in edges:
+                try:
+                    (rx1, ry1), (rx2, ry2) = points[id1]['location'], points[id2]['location']
+                    draw.line(markup_surf, (0, 255, 255),
+                              (int(new_map_img.get_width() * rx1), int(new_map_img.get_height() * ry1)),
+                              (int(new_map_img.get_width() * rx2), int(new_map_img.get_height() * ry2)))
+                except:
+                    update_map()
+
+
             for pointid in points:
 
                 rx, ry = points[pointid]['location']
@@ -291,11 +313,6 @@ def draw_shit():
                 draw.circle(markup_surf, color,
                             (int(new_map_img.get_width() * rx), int(new_map_img.get_height() * ry)), 5)
 
-            for id1, id2 in edges:
-                (rx1, ry1), (rx2, ry2) = points[id1]['location'], points[id2]['location']
-                draw.line(markup_surf, (0, 255, 255),
-                          (int(new_map_img.get_width() * rx1), int(new_map_img.get_height() * ry1)),
-                          (int(new_map_img.get_width() * rx2), int(new_map_img.get_height() * ry2)))
 
             if mode == 'viewing':
                 draw.circle(markup_surf, (0, 0, 255),

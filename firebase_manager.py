@@ -59,21 +59,21 @@ def get_nodes():
 
 
 def get_edges():
-    edges = firebase_admin.firestore.client(app=None) \
+    data = firebase_admin.firestore.client(app=None) \
         .collection(COLLECTION_NAME) \
-        .document('edges') \
+        .document('edges')\
         .get().to_dict()
 
-    clean_edges = []
+    good_data = []
 
+    for i in data:
+        good_data.append(data[i])
+
+    return good_data
+
+def set_edge(edges):
     for e in edges:
-        clean_edges.append(edges[e])
-
-    return clean_edges
-
-
-def add_edge(node1, node2):
-    firebase_admin.firestore.client(app=None) \
-        .collection(COLLECTION_NAME) \
-        .document('edges') \
-        .update({str(uuid.uuid4()): [node1, node2]})
+        firebase_admin.firestore.client(app=None) \
+            .collection(COLLECTION_NAME) \
+            .document('edges')\
+            .update({generate_id(e): e})
