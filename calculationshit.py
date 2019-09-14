@@ -42,29 +42,30 @@ class RefPoint:
 #fp = floor plan
 #sc = scale of pixels in a meter
 #pairs = list of all ref point ID pairs that make an edge
-def Initialize(rp, fp, sc, pairs):
+#rlocs = list of all the positions of rps
+def Initialize(rp, fp, sc, pairs, rlocs):
     global floorPlan, scale, refPoints, curLocation, graph, closestNode, refCount
     floorPlan = fp
     scale = sc #How many pixels are in a meter
-    #dict
-    #rp = {0: [{"abd":4, "bcd":8}, (2, 5)], 1 :[{"abc":1, "bcd":11}, (3, 5)], 2: [{"abc":2, "bcd":5}, (2, 7)]}
-    pairs = [(0, 1), (1, 2), (0, 2)]
+
+
+
     #List of all  points (~75)?
     #each ref point contains 3 things: an ID, a signal list to all AP's, and a location scaled from 0 to 1 (ignore pixel coords currently there)
     refPoints = []
     refCount = len(rp)
-    print(rp)
-    for i in range(refCount):
-        refPoints.append(RefPoint(i, rp[i][0], rp[i][1]))
+    w = 0
+    pairToIndex = {}
+    for k in rp.keys():
+        refPoints.append(RefPoint(w, rp[k]["aps"], rp[k]["location"]))
+        pairToIndex[k] = w
+        w += 1
+
+    #Make edges list
+    edges = []
+    for i in range(pairs):
+        edges.append((pairToIndex[pairs[0]], pairToIndex[pairs[1]]))
         
-    #refPoints = [
-    #             RefPoint(0, {"00-D0-56-F2-B5-12":250, "00-D0-56-F2-B5-12":250}, (232, 356)),
-    #             RefPoint(1, {"25-D5-56-F2-B8-12":450, "00-D0-56-F2-B5-12":250}, (335, 358)),
-    #             RefPoint(2, {"35-D5-56-F2-B8-12":750, "00-D0-56-F2-B5-12":250}, (385, 328)),
-    #             RefPoint(3, {"27-D5-56-F2-B8-12":0, "00-D0-56-F2-B5-12":250}, (435, 158)),
-    #             RefPoint(4, {"29-D5-56-F2-B8-12":0, "00-D0-56-F2-B5-12":250}, (255, 258)),
-    #             RefPoint(5, {"45-D5-56-F2-B8-12, "00-D0-56-F2-B5-12":250}, (319, 458))
-    #            ]
 
     # address:[(address, dist), (address, dist)]
     # Ref points and what each ref point is connected to
@@ -72,17 +73,19 @@ def Initialize(rp, fp, sc, pairs):
     graph = []
     for i in range(refCount):
         graph.append([])
-    for pair in pairs:
+    for pair in edges:
         a = pair[0]
         b = pair[1]
         dist = ((refPoints[a].pos[0]-refPoints[b].pos[0])**2+(refPoints[a].pos[1]-refPoints[b].pos[1])**2)**0.5
         graph[a].append((b, dist))
         graph[b].append((a, dist))
 
+
     
 #Mac Address:(Db, f)
 #This is your current location signals to each AP
 #locSigs = {1:(1, 1), 2:(3, 5), 4:(9, 2)}
+
 def findLocation(locSigs):
     nodeBreadth = 2 #Number of nodes whose paths are being checked
 
@@ -118,6 +121,3 @@ def getPath(destination):
                 dists[edge[0]][1] = (dists[cur][1]+[(cur, edge[0])])
                 points.put(edge[0])
     return lineSegList
-    
-
-
