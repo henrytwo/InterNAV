@@ -121,7 +121,6 @@ def draw_shit():
                             minval = dist
 
                     if minpoint != ():
-                        del points[firebase_manager.generate_id(minpoint)]
                         draw.circle(markup_surf, (0, 0, 0, 0), (
                             int(new_map_img.get_width() * minpoint[0]),
                             int(new_map_img.get_height() * minpoint[1])), 5)
@@ -129,11 +128,14 @@ def draw_shit():
                         hitlist = []
 
                         for i in edges:
-                            if minpoint in i:
+                            if firebase_manager.generate_id(minpoint) in i:
                                 hitlist.append(i)
 
                         for z in hitlist:
                             edges.remove(z)
+
+                        del points[firebase_manager.generate_id(minpoint)]
+                        update_map()
 
                     unsaved_changes = True
 
@@ -154,7 +156,7 @@ def draw_shit():
                         print(dist)
                         if dist < 0.005 and dist < minval:
                             minpoint = p
-                            minval = minpoint
+                            minval = dist
 
                             highlighted_point = firebase_manager.generate_id(p)
 
