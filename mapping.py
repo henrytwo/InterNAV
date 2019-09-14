@@ -220,6 +220,12 @@ def draw_shit():
                 highlighted_point = list(to_be_scanned.keys())[0]
                 center(to_be_scanned[highlighted_point]['location'])
 
+                manual_zoom = 2
+                pos[0] -= int(to_be_scanned[highlighted_point]['location'][0] * p_w)
+                pos[1] -= int(to_be_scanned[highlighted_point]['location'][1] * p_h)
+
+                update_map()
+
 
             screen.fill((0, 0, 0))
             pos[0] = max(min(pos[0], screen_size[0] - 160), 160 - new_map_img.get_width())
