@@ -3,7 +3,7 @@ from pygame import *
 
 init()
 
-map_img = image.load('notcoding.png')
+map_img = image.load('notcoding.jpg')
 screen_size = get_start_dims(map_img)
 
 screen = display.set_mode(screen_size, RESIZABLE)
