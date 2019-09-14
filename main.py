@@ -24,8 +24,22 @@ def draw_shit():
 
     def center(p):
         nonlocal pos, new_map_rect
-        pos[0] += screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0]))
-        pos[1] += screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1]))
+        # pos[0] += screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0]))
+        # pos[1] += screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1]))
+
+        x_movement = screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0]))
+        y_movement = screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1]))
+
+        for x in range(x_movement):
+            pos[0] += 1 * x_movement / abs(x_movement)
+            update_map()
+            display.update()
+
+        for y in range(y_movement):
+            pos[1] += 1 * y_movement / abs(y_movement)
+            update_map()
+            display.update()
+
         new_map_rect.topleft = pos
 
     def update_map():
