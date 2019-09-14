@@ -66,7 +66,7 @@ def draw_shit():
             if e.type == QUIT:
                 break
             elif e.type == MOUSEBUTTONDOWN:
-                if e.button == 3:
+                if e.button == 3 and mode == 'data':
                     mx, my = e.pos
                     mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
                     my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
@@ -79,16 +79,18 @@ def draw_shit():
                         print(dist)
                         if dist < 0.005 and dist < minval:
                             minpoint = p
-                            minval = minpoint
+                            minval = dist
 
                     if minpoint != ():
-                        points -= {minpoint}
+                        points.remove(minpoint)
                         draw.circle(dot_surf, (0, 0, 0, 0), (
                             int(new_map_img.get_width() * minpoint[0]),
                             int(new_map_img.get_height() * minpoint[1])), 5)
 
+                    unsaved_changes = True
+
             elif e.type == MOUSEBUTTONUP:
-                if e.button == 1:
+                if e.button == 1 and mode == 'data':
                     mx, my = e.pos
                     mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
                     my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
@@ -115,6 +117,9 @@ def draw_shit():
                         pos[0] += screen_size[0] // 2 - int(new_map_img.get_width() * minpoint[0])
                         pos[1] += screen_size[1] // 2 - int(new_map_img.get_height() * minpoint[1])
                         new_map_rect.topleft = pos
+
+
+                    unsaved_changes = True
 
                 elif e.button == 4:
                     if manual_zoom < 2:
