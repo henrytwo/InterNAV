@@ -12,7 +12,7 @@
 #Ref points need unique ID's
 
 from math import *
-
+from Queue import *
 
 class RefPoint:
     def __init__(self, ID, signalList, pos):
@@ -35,14 +35,13 @@ class RefPoint:
         return tot/n
 
 
-
 floorPlan = None
 scale = None
 refPoints = None
 curLocation = None 
 graph = None    
-
-        
+closestNode = None
+refCount = None
 
 #rp = ref point list
 #fp = floor plan
@@ -55,8 +54,10 @@ def Initialize(rp, fp, sc, pairs):
     #List of all ref points (~75)?
     #each ref point contains 3 things: an ID, a signal list to all AP's, and a location scaled from 0 to 1 (ignore pixel coords currently there)
     refPoints = []
-    for i in range(len(rp)):
+    refCount = len(rp)
+    for i in range(refCount):
         refPoints.append(RefPoint(i, rp[i][0], rp[i][1]))
+        
     #refPoints = [
     #             RefPoint(0, {"00-D0-56-F2-B5-12":250, "00-D0-56-F2-B5-12":250}, (232, 356)),
     #             RefPoint(1, {"25-D5-56-F2-B8-12":450, "00-D0-56-F2-B5-12":250}, (335, 358)),
@@ -70,13 +71,15 @@ def Initialize(rp, fp, sc, pairs):
     # Ref points and what each ref point is connected to
     # [N:[nodes], M:[nodes]]
     graph = []
-    for i in range(len(refPoints)):
+    for i in range(refCount):
         graph.append([])
     for pair in pairs:
         a = pair[0]
         b = pair[1]
-        graph[a].append(b)
-        graph[b].append(a)
+        dist = ((refPoints[a].pos[0]-refPoints[b].pos[0])**2+(refPoints[a].pos[1]-refPoints[b].pos[1])**2)**0.5
+        graph[a].append((b, dist))
+        graph[b].append((a, dist))
+
     
 #Mac Address:(Db, f)
 #This is your current location signals to each AP
@@ -94,13 +97,28 @@ def findLocation(locSigs):
     pointA = topNodeIDs[0][2]
     pointB = topeNodeIDs[1][2]
     totError = topNodeIDs[0][0] + topNodeIDs[1][0]+2
-    loc = (pointA[0] + pointB[0]*((topNodeIDs[0][0]+1)/totError), pointA[1] + pointB[1]*((topNodeIDs[0][0]+1)/totError))
-    return loc
+    curLocation = (pointA[0] + pointB[0]*((topNodeIDs[0][0]+1)/totError), pointA[1] + pointB[1]*((topNodeIDs[0][0]+1)/totError))
+    closestNode = topNodeIDs[0]
+    
+    return curLocation
 
     
 
-
+#Destination should be a ref point ID
 def getPath(destination):
-    pass
+    lineSegList = [(closestNode[2], curLocation)]
+    dists = [(99999, []) for i in range(refCount)]
+    dists[closestNode[1]] = (0, [])
+    points = Queue()
+    points.put(closestNode[1])
+    while not points.empty():
+        cur = points.get()
+        for edge in graph[cur]:
+            if dists[edge[0]][0] > dists[cur][0]+edge[1]:
+                dists[edge[0]][0] = dists[cur][0]+edge[1]
+                dists[edge[0]][1] = (dists[cur][1]+[(cur, edge[0])])
+                points.put(edge[0])
+    return lineSegList
+    
 
 
