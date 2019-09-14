@@ -17,10 +17,10 @@ shared_dict = manager.dict()
 cred = credentials.Certificate('firebase_key.json')
 firebase_admin.initialize_app(cred)
 
+
 def update_position(shared_dict):
     while True:
         shared_dict['data'] = wifi_manager.dump_aps('wlp0s20f3', 3)
-
 
 
 def draw_shit(shared_dict):
@@ -44,17 +44,32 @@ def draw_shit(shared_dict):
         x_movement = int(screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0])))
         y_movement = int(screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1])))
 
-        print('moving x')
-        for x in range(x_movement):
-            pos[0] += x_movement / abs(x_movement)
-            update_map()
-            display.update()
+        print(x_movement, y_movement, p)
 
-        print('moving y')
-        for y in range(y_movement):
-            pos[1] += y_movement / abs(y_movement)
+        while abs(x_movement) > 2 or abs(y_movement) > 2:
+            pos[0] += x_movement / 2
+            pos[1] += y_movement / 2
+
+            x_movement /= 2
+            y_movement /= 2
             update_map()
             display.update()
+        print('gei')
+
+        # pos is top left corner
+        #
+
+        # print('moving x')
+        # for x in range(abs(x_movement) // 3):
+        #     pos[0] += 3 * x_movement / abs(x_movement)
+        #     update_map()
+        #     display.update()
+        #
+        # print('moving y')
+        # for y in range(abs(y_movement) // 3):
+        #     pos[1] += 3 * y_movement / abs(y_movement)
+        #     update_map()
+        #     display.update()
 
         new_map_rect.topleft = pos
 
@@ -64,6 +79,7 @@ def draw_shit(shared_dict):
         new_map_rect.size = new_map_img.get_size()
         new_map_rect.topleft = pos
         markup_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
+        screen.fill(0)
         screen.blit(new_map_img, pos)
 
     init()
@@ -117,6 +133,8 @@ def draw_shit(shared_dict):
 
     to_be_scanned = {}
 
+    auto_zoomed = False
+
     point_recorded = False
 
     screen.fill((200, 200, 255))
@@ -146,7 +164,7 @@ def draw_shit(shared_dict):
                         p = points[pointid]['location']
 
                         dist = hypot(p[0] - mx, p[1] - my)
-                        #print(dist)
+                        # print(dist)
                         if dist < 0.005 and dist < minval:
                             minpoint = p
                             minval = dist
@@ -171,7 +189,7 @@ def draw_shit(shared_dict):
                     unsaved_changes = True
 
             elif e.type == MOUSEBUTTONUP:
-                if e.button in [1, 2] and mode == 'data':
+                if e.button in [1, 2]:
                     mx, my = e.pos
                     mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
                     my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
@@ -184,7 +202,7 @@ def draw_shit(shared_dict):
                         p = points[pointid]['location']
 
                         dist = hypot(p[0] - mx, p[1] - my)
-                        #print(dist)
+                        # print(dist)
                         if dist < 0.005 and dist < minval:
                             minpoint = p
                             minval = dist
@@ -192,7 +210,7 @@ def draw_shit(shared_dict):
                             highlighted_point = firebase_manager.generate_id(p)
 
                     if minpoint == ():
-                        if not click_and_drag and new_map_rect.collidepoint(e.pos):
+                        if not click_and_drag and new_map_rect.collidepoint(e.pos) and mode == 'data':
                             mx, my = e.pos
                             mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
                             my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
@@ -202,9 +220,9 @@ def draw_shit(shared_dict):
                             }
 
                     else:
-                        if e.button == 1:
+                        if e.button == 1 and mode == 'viewing':
                             center(minpoint)
-                        elif e.button == 2:
+                        if e.button == 2:
                             current_edge.append(firebase_manager.generate_id(minpoint))
                             if len(current_edge) == 2:
                                 edges.append(current_edge)
@@ -227,6 +245,7 @@ def draw_shit(shared_dict):
                         update_map()
 
                 click_and_drag = False
+
             elif e.type == MOUSEMOTION:
                 if mb[0]:
                     click_and_drag = True
@@ -256,6 +275,8 @@ def draw_shit(shared_dict):
             elif keys_shit[K_3]:
                 mode = 'scanning'
 
+                auto_zoomed = False
+
                 to_be_scanned = copy.deepcopy(points)
 
                 unsaved_changes = True
@@ -283,8 +304,8 @@ def draw_shit(shared_dict):
                 calculationshit.Initialize(points, None, None, edges)
 
             if mode == 'viewing':
-
-                calculatedPosition = calculationshit.findLocation(shared_dict['data'] if ('data' in shared_dict) else wifi_manager.dump_aps('wlp0s20f3', 3))
+                calculatedPosition = calculationshit.findLocation(
+                    shared_dict['data'] if ('data' in shared_dict) else wifi_manager.dump_aps('wlp0s20f3', 3))
 
                 update_map()
 
@@ -305,11 +326,17 @@ def draw_shit(shared_dict):
                     data_list.append('POINTS REMAINING: ' + str(len(to_be_scanned.keys())))
 
                     highlighted_point = list(to_be_scanned.keys())[0]
+                    print('hey')
+
+                    if not auto_zoomed:
+                        manual_zoom = 2
+                        pos[0] -= int(to_be_scanned[highlighted_point]['location'][0] * p_w)
+                        pos[1] -= int(to_be_scanned[highlighted_point]['location'][1] * p_h)
+
+                        auto_zoomed = True
+
                     center(to_be_scanned[highlighted_point]['location'])
 
-                    manual_zoom = 2
-                    pos[0] -= int(to_be_scanned[highlighted_point]['location'][0] * p_w)
-                    pos[1] -= int(to_be_scanned[highlighted_point]['location'][1] * p_h)
 
                     update_map()
 
@@ -365,6 +392,7 @@ def draw_shit(shared_dict):
         break
 
     display.quit()
+
 
 up = multiprocessing.Process(target=update_position, args=(shared_dict,))
 up.start()

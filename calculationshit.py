@@ -82,7 +82,12 @@ def Initialize(rp, fp, sc, p):
     #Make edges list
     edges = []
     for i in range(len(pairs)):
-        edges.append((pairToIndex[pairs[i][0]], pairToIndex[pairs[i][1]]))
+        #print(i, pairs[i])
+
+        #if pairs[i] != '0|164279986487971070|8906485671191552':
+
+        if pairs[i][0] in pairToIndex and pairs[i][1] in pairToIndex:
+            edges.append((pairToIndex[pairs[i][0]], pairToIndex[pairs[i][1]]))
         
 
     # address:[(address, dist), (address, dist)]
@@ -151,12 +156,13 @@ def findLocation(abd):
 ##    curLocation = (pointA[0] + (pointB[0]-pointA[0])*((topNodeIDs[0][0]+1)/totError), pointA[1] + (pointB[1]-pointA[1])*((topNodeIDs[0][0]+1)/totError))
 ##    closestNode = topNodeIDs[0]
     
-    if curLocation and prevLocation and ((curLocation[0]-prevLocation[0])**2 + (curLocation[1]+prevLocation[1])**2)**0.5 > 0.2 and tries != 1:
+    """if curLocation and prevLocation and ((curLocation[0]-prevLocation[0])**2 + (curLocation[1]+prevLocation[1])**2)**0.5 > 0.2 and tries != 1:
         curLocation = prevLocation
         tries += 1
     else:
         tries = 0
-    
+    """
+
     return curLocation
 
     
