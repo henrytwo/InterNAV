@@ -14,6 +14,9 @@
 from math import *
 from queue import *
 
+curLocation = False
+tries = 0
+
 class RefPoint:
     def __init__(self, ID, signalList, pos):
         self.ID = ID #Random unique ID
@@ -102,6 +105,8 @@ def Initialize(rp, fp, sc, p):
 #locSigs = {1:(1, 1), 2:(3, 5), 4:(9, 2)}
 
 def findLocation(abd):
+    global curLocation, tries
+
     prevLocation = curLocation
     aps = []
     for a in abd.keys():
@@ -122,7 +127,7 @@ def findLocation(abd):
         temp.append((tot, a.ID, b.ID, a.pos, b.pos))
 
     topNodeIDs = min(temp)
-    print(topNodeIDs)
+    #print(topNodeIDs)
     pointA = topNodeIDs[1]
     pointB = topNodeIDs[2]
     totError = topNodeIDs[0]+2
@@ -146,7 +151,7 @@ def findLocation(abd):
 ##    curLocation = (pointA[0] + (pointB[0]-pointA[0])*((topNodeIDs[0][0]+1)/totError), pointA[1] + (pointB[1]-pointA[1])*((topNodeIDs[0][0]+1)/totError))
 ##    closestNode = topNodeIDs[0]
     
-    if ((curLocation[0]-prevLocation[0])**2 + (curLocation[1]+prevLocation[1])**2)**0.5 > 0.2 and tries != 1 and prevLocation != None:
+    if curLocation and prevLocation and ((curLocation[0]-prevLocation[0])**2 + (curLocation[1]+prevLocation[1])**2)**0.5 > 0.2 and tries != 1:
         curLocation = prevLocation
         tries += 1
     else:

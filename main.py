@@ -8,11 +8,24 @@ import firebase_admin
 import wifi_manager
 from firebase_admin import credentials
 import calculationshit
+import multiprocessing
+import time as t
+
+manager = multiprocessing.Manager()
+shared_dict = manager.dict()
+
+cred = credentials.Certificate('firebase_key.json')
+firebase_admin.initialize_app(cred)
+
+def update_position(shared_dict):
+    while True:
+        shared_dict['data'] = wifi_manager.dump_aps('wlp0s20f3', 3)
 
 
-def draw_shit():
+
+def draw_shit(shared_dict):
     def firebase_sync():
-        global last_synced, unsaved_changes
+        nonlocal last_synced, unsaved_changes
 
         print('FIREBASE SYNCED!')
 
@@ -23,6 +36,7 @@ def draw_shit():
         firebase_manager.set_edge(edges)
 
     def center(p):
+
         nonlocal pos, new_map_rect
         # pos[0] += screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0]))
         # pos[1] += screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1]))
@@ -50,6 +64,7 @@ def draw_shit():
         new_map_rect.size = new_map_img.get_size()
         new_map_rect.topleft = pos
         markup_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
+        screen.blit(new_map_img, pos)
 
     init()
 
@@ -107,7 +122,7 @@ def draw_shit():
     screen.fill((200, 200, 255))
     screen.blit(logo, ((screen_size[0] - logo.get_width()) // 2, (screen_size[1] - logo.get_height()) // 2))
     display.flip()
-    time.wait(2000)
+    t.sleep(0.05)
 
     if not points:
         mode = 'data'
@@ -131,7 +146,7 @@ def draw_shit():
                         p = points[pointid]['location']
 
                         dist = hypot(p[0] - mx, p[1] - my)
-                        print(dist)
+                        #print(dist)
                         if dist < 0.005 and dist < minval:
                             minpoint = p
                             minval = dist
@@ -169,7 +184,7 @@ def draw_shit():
                         p = points[pointid]['location']
 
                         dist = hypot(p[0] - mx, p[1] - my)
-                        print(dist)
+                        #print(dist)
                         if dist < 0.005 and dist < minval:
                             minpoint = p
                             minval = dist
@@ -268,13 +283,15 @@ def draw_shit():
                 calculationshit.Initialize(points, None, None, edges)
 
             if mode == 'viewing':
-                calculatedPosition = calculationshit.findLocation(wifi_manager.dump_aps('wlp0s20f3', 3))
+
+                calculatedPosition = calculationshit.findLocation(shared_dict['data'] if ('data' in shared_dict) else wifi_manager.dump_aps('wlp0s20f3', 3))
 
                 update_map()
 
                 print('POSITION!: ', calculatedPosition)
 
             data_list = [
+                'Keyboard commands: 1-View/Navigation 2-Configuration 3-Scanning 4-Sync with Firebase 5-Record RP',
                 'MODE: ' + mode,
                 'LAST SYNCED: ' + last_synced,
                 'UNSAVED CHANGES: ' + str(unsaved_changes)
@@ -349,9 +366,11 @@ def draw_shit():
 
     display.quit()
 
+up = multiprocessing.Process(target=update_position, args=(shared_dict,))
+up.start()
 
-if __name__ == '__main__':
-    cred = credentials.Certificate('firebase_key.json')
-    firebase_admin.initialize_app(cred)
+dp = multiprocessing.Process(target=draw_shit, args=(shared_dict,))
+dp.start()
 
-    draw_shit()
+print('Running!')
+input('Press any key to end')
