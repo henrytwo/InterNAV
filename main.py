@@ -30,8 +30,8 @@ def draw_shit():
         while pos != final_pos:
             # pos[0] += screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0]))
             # pos[1] += screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1]))
-            pos[0] += ceil(final_pos[0] - pos[0] / 2)
-            pos[1] += ceil(final_pos[1] - pos[1] / 2)
+            pos[0] += ceil((final_pos[0] - pos[0]) / 2)
+            pos[1] += ceil((final_pos[1] - pos[1]) / 2)
 
         new_map_rect.topleft = pos
 
