@@ -92,15 +92,28 @@ def draw_screen():
 
             elif e.type == MOUSEBUTTONUP:
                 if e.button == 1:
-                    if not click_and_drag and new_map_rect.collidepoint(e.pos):
-                        mx, my = e.pos
-                        mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
-                        my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
-                        points.append([mx, my])
+                    mx, my = e.pos
+                    mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
+                    my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
 
-                        unsaved_changes = True
+                    minpoint = ()
+                    minval = 99999
 
-                        #firebase_manager.set_nodes(points)
+                    for p in points:
+                        dist = hypot(p[0] - mx, p[1] - my)
+                        print(dist)
+                        if dist < 0.005 and dist < minval:
+                            minpoint = p
+                            minval = minpoint
+
+                    if minpoint != ():
+                        if not click_and_drag and new_map_rect.collidepoint(e.pos):
+                            mx, my = e.pos
+                            mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
+                            my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
+                            points.append([mx, my])
+
+                            firebase_manager.set_nodes(points)
 
                     else:
                         pos[0] += screen_size[0] - minpoint[0]
