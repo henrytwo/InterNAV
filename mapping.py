@@ -116,8 +116,8 @@ def draw_screen():
 
                     else:
                         print(minpoint)
-                        pos[0] += screen_size[0] // 2 - minpoint[0]
-                        pos[1] += screen_size[1] // 2 - minpoint[1]
+                        pos[0] += screen_size[0] // 2 - int(new_map_img.get_width() * minpoint[0])
+                        pos[1] += screen_size[1] // 2 - int(new_map_img.get_height() * minpoint[1])
                         new_map_rect.topleft = pos
 
                 elif e.button == 4:
