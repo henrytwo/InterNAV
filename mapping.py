@@ -7,7 +7,10 @@ import datetime
 import firebase_admin
 from firebase_admin import credentials
 
-def draw_shit():
+
+def draw_screen():
+    cred = credentials.Certificate('firebase_key.json')
+    firebase_admin.initialize_app(cred)
 
     init()
 
@@ -66,30 +69,29 @@ def draw_shit():
                 break
             elif e.type == MOUSEBUTTONDOWN:
                 if e.button == 1:
-                    clicked = True
-                if e.button == 3 and mode == 'data': # Remove point
-                    mx, my = e.pos
-                    mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
-                    my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
+                    if e.button == 3:
+                        mx, my = e.pos
+                        mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
+                        my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
 
-                    minpoint = ()
-                    minval = 99999
+                        minpoint = ()
+                        minval = 99999
 
-                    for p in points:
-                        dist = hypot(p[0] - mx, p[1] - my)
-                        print(dist)
-                        if dist < 0.005 and dist < minval:
-                            minpoint = p
-                            minval = dist
+                        for p in points:
+                            dist = hypot(p[0] - mx, p[1] - my)
+                            print(dist)
+                            if dist < 0.005 and dist < minval:
+                                minpoint = p
+                                minval = minpoint
 
-                    if minpoint != ():
-                        points.remove(minpoint)
-                        draw.circle(dot_surf, (0, 0, 0, 0), (int(new_map_img.get_width() * minpoint[0]), int(new_map_img.get_height() * minpoint[1])), 5)
-
-                    unsaved_changes = True
+                        if minpoint != ():
+                            points -= {minpoint}
+                            draw.circle(dot_surf, (0, 0, 0, 0), (
+                                int(new_map_img.get_width() * minpoint[0]),
+                                int(new_map_img.get_height() * minpoint[1])), 5)
 
             elif e.type == MOUSEBUTTONUP:
-                if e.button == 1 and mode == 'data': # Add point
+                if e.button == 1:
                     if not click_and_drag and new_map_rect.collidepoint(e.pos):
                         mx, my = e.pos
                         mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
@@ -99,6 +101,11 @@ def draw_shit():
                         unsaved_changes = True
 
                         #firebase_manager.set_nodes(points)
+
+                    else:
+                        pos[0] += screen_size[0] - minpoint[0]
+                        pos[1] += screen_size[1] - minpoint[1]
+                        new_map_rect.topleft = pos
 
                 elif e.button == 4:
                     if manual_zoom < 2:
@@ -190,7 +197,7 @@ def draw_shit():
 
 
 if __name__ == '__main__':
+    draw_screen()
 
     cred = credentials.Certificate('firebase_key.json')
     firebase_admin.initialize_app(cred)
-    draw_shit()
