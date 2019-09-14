@@ -15,7 +15,7 @@ def add_node(pair):
         .collection('map') \
         .document('nodes') \
         .update({
-            str(pair): {
+            ''.join([str(x).replace('.','|') for x in pair]): {
                 'location': pair
             }
         })
