@@ -10,6 +10,14 @@ from firebase_admin import credentials
 
 
 def draw_shit():
+    def firebase_sync():
+        print('FIREBASE SYNCED!')
+
+        last_synced = str(datetime.datetime.now())
+        unsaved_changes = False
+
+        firebase_manager.set_nodes(points)
+
     def center(p):
         nonlocal pos, new_map_rect
         pos[0] += screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0]))
@@ -185,17 +193,14 @@ def draw_shit():
 
                 to_be_scanned = copy.deepcopy(points)
 
+                unsaved_changes = True
+
                 for i in copy.deepcopy(to_be_scanned):
                     if 'aps' in to_be_scanned[i]:
                         del to_be_scanned[i]
 
             if keys_shit[K_4]:
-                print('FIREBASE SYNCED!')
-
-                last_synced = str(datetime.datetime.now())
-                unsaved_changes = False
-
-                firebase_manager.set_nodes(points)
+                firebase_sync()
 
             if keys_shit[K_5] and mode == 'scanning' and not point_recorded:
                 point_recorded = True
@@ -214,17 +219,29 @@ def draw_shit():
             ]
 
             if mode == 'scanning':
-                data_list.append('PLEASE MOVE TO DESIGNATED POSITION AND PRESS 5 TO RECORD POINT!')
-                data_list.append('POINTS REMAINING: ' + str(len(to_be_scanned.keys())))
 
-                highlighted_point = list(to_be_scanned.keys())[0]
-                center(to_be_scanned[highlighted_point]['location'])
+                if len(to_be_scanned):
 
-                manual_zoom = 2
-                pos[0] -= int(to_be_scanned[highlighted_point]['location'][0] * p_w)
-                pos[1] -= int(to_be_scanned[highlighted_point]['location'][1] * p_h)
+                    data_list.append('PLEASE MOVE TO DESIGNATED POSITION AND PRESS 5 TO RECORD POINT!')
+                    data_list.append('POINTS REMAINING: ' + str(len(to_be_scanned.keys())))
 
-                update_map()
+                    highlighted_point = list(to_be_scanned.keys())[0]
+                    center(to_be_scanned[highlighted_point]['location'])
+
+                    manual_zoom = 2
+                    pos[0] -= int(to_be_scanned[highlighted_point]['location'][0] * p_w)
+                    pos[1] -= int(to_be_scanned[highlighted_point]['location'][1] * p_h)
+
+                    update_map()
+
+                else:
+                    data_list.append('SCANNING COMPLETE!')
+                    data_list.append('PRESS 1 TO RETURN TO VIEW MODE')
+
+                    if unsaved_changes:
+                        firebase_sync()
+
+
 
 
             screen.fill((0, 0, 0))
