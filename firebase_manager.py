@@ -5,8 +5,41 @@ from firebase_admin import auth
 from datetime import datetime
 import uuid
 
+def set_nodes(nodes):
+
+    for i in nodes:
+        add_node(i)
+
+def add_node(pair):
+    firebase_admin.firestore.client(app=None) \
+        .collection('map') \
+        .document('nodes') \
+        .update({
+            str(pair): {
+                'location': pair
+            }
+        })
+
+def add_node_data(name, data):
+
+    """
+    :param name: dis is da node name
+    :param data: dis is da dict with da {macaddress: db and other stuff}
+    :return:
+    """
+
+    firebase_admin.firestore.client(app=None) \
+        .collection('map') \
+        .document('nodes') \
+        .update({
+        str(name): {
+            'aps': data
+        }
+    })
+
+
 def get_nodes():
-    thing = firebase_admin.firestore.client(app=None) \
+    return firebase_admin.firestore.client(app=None) \
         .collection('map') \
         .document('nodes') \
         .get().to_dict()
@@ -15,8 +48,12 @@ def get_nodes():
     ok dis return this shit
     
     {
-        "index shit of the node": [
-            x, y
+        "index shit of the node": {
+            "location": [x, y],
+            "aps" : {
+                "<mac>" : db,
+                ....
+            }
         }, ...
     }
     
@@ -35,11 +72,6 @@ def get_edges():
 
     return clean_edges
 
-def add_node(name, x, y):
-    firebase_admin.firestore.client(app=None) \
-        .collection('map') \
-        .document('nodes') \
-        .update({name: [x, y]})
 
 def add_edge(node1, node2):
     firebase_admin.firestore.client(app=None) \
@@ -47,27 +79,3 @@ def add_edge(node1, node2):
         .document('edges') \
         .update({str(uuid.uuid4()): [node1, node2]})
 
-def add_node_data(name, data):
-
-    """
-    :param name: dis is da node name
-    :param data: dis is da dict with da {macaddress: db and other stuff}
-    :return:
-    """
-
-    firebase_admin.firestore.client(app=None) \
-        .collection('signals') \
-        .document(str(name)) \
-        .set(data)
-
-def get_node_data():
-    node_data = firebase_admin.firestore.client(app=None) \
-        .collection('signals') \
-        .get()
-
-    clean_node_data = {}
-
-    for i in node_data:
-        clean_node_data[i.id] = i.to_dict()
-
-    return clean_node_data
