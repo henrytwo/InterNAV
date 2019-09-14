@@ -2,15 +2,12 @@ from mapping_util import *
 from pygame import *
 from math import hypot
 import firebase_manager
-
+import datetime
 
 import firebase_admin
 from firebase_admin import credentials
 
-
-def draw_screen():
-    cred = credentials.Certificate('firebase_key.json')
-    firebase_admin.initialize_app(cred)
+def draw_shit():
 
     init()
 
@@ -30,6 +27,12 @@ def draw_screen():
     angle = 0
     pos = [0, 0]
 
+    mode = 'viewing'
+
+    # MODES
+    # 1 - Viewing map and getting location
+    # 2 - Adding/Modifying nodes and graph
+
     new_map_img = transform.rotozoom(map_img, angle, screen_zoom * manual_zoom)
     new_map_rect = new_map_img.get_rect()
     new_map_rect.topleft = pos
@@ -43,6 +46,8 @@ def draw_screen():
 
     points = []
 
+    unsaved_changes = False
+    last_synced = 'Never'
     data_list = []
 
     if raw_points:
@@ -52,7 +57,7 @@ def draw_screen():
     screen.fill((200, 200, 255))
     screen.blit(logo, ((screen_size[0] - logo.get_width()) // 2, (screen_size[1] - logo.get_height()) // 2))
     display.flip()
-    time.wait(2000)
+    time.wait(200)
 
     while True:
         mb = mouse.get_pressed()
@@ -61,36 +66,39 @@ def draw_screen():
                 break
             elif e.type == MOUSEBUTTONDOWN:
                 if e.button == 1:
-                    if e.button == 3:
-                        mx, my = e.pos
-                        mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
-                        my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
+                    clicked = True
+                if e.button == 3 and mode == 'data': # Remove point
+                    mx, my = e.pos
+                    mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
+                    my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
 
-                        minpoint = ()
-                        minval = 99999
+                    minpoint = ()
+                    minval = 99999
 
-                        for p in points:
-                            dist = hypot(p[0] - mx, p[1] - my)
-                            print(dist)
-                            if dist < 0.005 and dist < minval:
-                                minpoint = p
-                                minval = minpoint
+                    for p in points:
+                        dist = hypot(p[0] - mx, p[1] - my)
+                        print(dist)
+                        if dist < 0.005 and dist < minval:
+                            minpoint = p
+                            minval = dist
 
-                        if minpoint != ():
-                            points -= {minpoint}
-                            draw.circle(dot_surf, (0, 0, 0, 0), (
-                                int(new_map_img.get_width() * minpoint[0]),
-                                int(new_map_img.get_height() * minpoint[1])), 5)
+                    if minpoint != ():
+                        points.remove(minpoint)
+                        draw.circle(dot_surf, (0, 0, 0, 0), (int(new_map_img.get_width() * minpoint[0]), int(new_map_img.get_height() * minpoint[1])), 5)
+
+                    unsaved_changes = True
 
             elif e.type == MOUSEBUTTONUP:
-                if e.button == 1:
+                if e.button == 1 and mode == 'data': # Add point
                     if not click_and_drag and new_map_rect.collidepoint(e.pos):
                         mx, my = e.pos
                         mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
                         my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
                         points.append([mx, my])
 
-                        firebase_manager.set_nodes(points)
+                        unsaved_changes = True
+
+                        #firebase_manager.set_nodes(points)
 
                 elif e.button == 4:
                     if manual_zoom < 2:
@@ -131,6 +139,32 @@ def draw_screen():
                 display.set_mode(screen_size, RESIZABLE)
 
         else:
+
+            keys_shit = key.get_pressed()
+
+            if keys_shit[K_1]:
+                mode = 'viewing'
+
+            if keys_shit[K_2]:
+                mode = 'data'
+
+            if keys_shit[K_3]:
+                mode = 'scanning'
+
+            if keys_shit[K_4]:
+                print('FIREBASE SYNCED!')
+
+                last_synced = str(datetime.datetime.now())
+                unsaved_changes = False
+
+                firebase_manager.set_nodes(points)
+
+            data_list = [
+                'MODE: ' + mode,
+                'LAST SYNCED: ' + last_synced,
+                'UNSAVED CHANGES: ' + str(unsaved_changes)
+            ]
+
             screen.fill((0, 0, 0))
             pos[0] = max(min(pos[0], screen_size[0] - 160), 160 - new_map_img.get_width())
             pos[1] = max(min(pos[1], screen_size[1] - 160), 160 - new_map_img.get_height())
@@ -156,4 +190,7 @@ def draw_screen():
 
 
 if __name__ == '__main__':
-    draw_screen()
+
+    cred = credentials.Certificate('firebase_key.json')
+    firebase_admin.initialize_app(cred)
+    draw_shit()
