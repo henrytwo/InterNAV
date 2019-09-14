@@ -26,9 +26,9 @@ class RefPoint:
         #sig is mac address
         for sig in locList.keys()+self.signalList.keys():
             if sig not in self.signalList.keys():
-                tot += locList[sig]
+                tot += abs(110-locList[sig])
             elif sig not in locList.keys():
-                tot += sigList[sig]
+                tot += abs(110-sigList[sig])
             else:
                 tot += abs(sigList[sig]-locList[sig])
             n += 1
