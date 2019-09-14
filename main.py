@@ -24,8 +24,15 @@ def draw_shit():
 
     def center(p):
         nonlocal pos, new_map_rect
-        pos[0] += screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0]))
-        pos[1] += screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1]))
+        final_pos = [pos[0] + screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0])),
+                     pos[1] + screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1]))]
+
+        while pos != final_pos:
+            # pos[0] += screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0]))
+            # pos[1] += screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1]))
+            pos[0] += round(final_pos[0] - pos[0] / 2)
+            pos[1] += round(final_pos[1] - pos[1] / 2)
+
         new_map_rect.topleft = pos
 
     def update_map():
@@ -53,7 +60,7 @@ def draw_shit():
     angle = 0
     pos = [0, 0]
 
-    mode = 'data'
+    mode = 'viewing'
 
     # MODES
     # 1 - Viewing map and getting location
@@ -64,13 +71,13 @@ def draw_shit():
     new_map_rect.topleft = pos
     markup_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
 
-    text = font.SysFont("Comic Sans MS", 20, bold=True, italic=True)
+    text = font.SysFont("Bahnschrift", 18)
 
     click_and_drag = False
 
     points = firebase_manager.get_nodes()
 
-    edges =  firebase_manager.get_edges()
+    edges = firebase_manager.get_edges()
     current_edge = []
 
     if not points:
@@ -91,7 +98,7 @@ def draw_shit():
     screen.fill((200, 200, 255))
     screen.blit(logo, ((screen_size[0] - logo.get_width()) // 2, (screen_size[1] - logo.get_height()) // 2))
     display.flip()
-    time.wait(200)
+    time.wait(2000)
 
     if not points:
         mode = 'data'
@@ -302,7 +309,6 @@ def draw_shit():
                 except:
                     update_map()
 
-
             for pointid in points:
 
                 rx, ry = points[pointid]['location']
@@ -315,7 +321,6 @@ def draw_shit():
                 draw.circle(markup_surf, color,
                             (int(new_map_img.get_width() * rx), int(new_map_img.get_height() * ry)), 5)
 
-
             if mode == 'viewing':
                 draw.circle(markup_surf, (0, 0, 255),
                             (int(new_map_img.get_width() * calculatedPosition[0]),
@@ -324,7 +329,7 @@ def draw_shit():
             screen.blit(markup_surf, pos)
 
             for i, data in enumerate(data_list):
-                screen.blit(text.render(data, True, (0, 0, 0), (200, 200, 200)), (20, 20 + 30 * i))
+                screen.blit(text.render(data, True, (0, 0, 0), (220, 220, 220)), (20, 20 + 30 * i))
 
             clock.tick()
             display.set_caption(f"InterNAV | FPS: {int(clock.get_fps())}")
