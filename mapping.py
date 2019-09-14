@@ -115,8 +115,8 @@ def draw_screen():
                             firebase_manager.set_nodes(points)
 
                     else:
-                        pos[0] += screen_size[0] - minpoint[0]
-                        pos[1] += screen_size[1] - minpoint[1]
+                        pos[0] += screen_size[0] // 2 - minpoint[0]
+                        pos[1] += screen_size[1] // 2 - minpoint[1]
                         new_map_rect.topleft = pos
 
                 elif e.button == 4:
