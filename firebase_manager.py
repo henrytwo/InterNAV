@@ -5,20 +5,16 @@ from firebase_admin import auth
 from datetime import datetime
 import uuid
 
+def generate_id(p):
+    return ''.join([str(x).replace('.','|') for x in p])
+
 def set_nodes(nodes):
 
-    for i in nodes:
-        add_node(i)
 
-def add_node(pair):
     firebase_admin.firestore.client(app=None) \
         .collection('map') \
         .document('nodes') \
-        .update({
-            ''.join([str(x).replace('.','|') for x in pair]): {
-                'location': pair
-            }
-        })
+        .set(nodes)
 
 def add_node_data(name, data):
 
