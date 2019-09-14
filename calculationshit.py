@@ -24,8 +24,8 @@ class RefPoint:
         tot = 0
         n = 0
         #sig is mac address
-        print(locList)
-        print(self.signalList)
+        #print(locList)
+        #print(self.signalList)
         for sig in set(locList.keys()) | set(self.signalList.keys()):
             if sig not in self.signalList.keys():
                 tot += abs(110-locList[sig])
@@ -63,7 +63,7 @@ def Initialize(rp, fp, sc, pairs):
 
     #Make edges list
     edges = []
-    for i in range(pairs):
+    for i in range(len(pairs)):
         edges.append((pairToIndex[pairs[0]], pairToIndex[pairs[1]]))
         
 
@@ -99,7 +99,7 @@ def findLocation(locSigs):
     pointA = topNodeIDs[0][2]
     pointB = topNodeIDs[1][2]
     totError = topNodeIDs[0][0] + topNodeIDs[1][0]+2
-    curLocation = (pointA[0] + pointB[0]*((topNodeIDs[0][0]+1)/totError), pointA[1] + pointB[1]*((topNodeIDs[0][0]+1)/totError))
+    curLocation = (pointA[0] + (pointB[0]-pointA[0])*((topNodeIDs[0][0]+1)/totError), pointA[1] + (pointB[1]-pointA[1])*((topNodeIDs[0][0]+1)/totError))
     closestNode = topNodeIDs[0]
     
     return curLocation

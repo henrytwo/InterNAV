@@ -7,6 +7,7 @@ import copy
 import firebase_admin
 import wifi_manager
 from firebase_admin import credentials
+import calculationshit
 
 
 def draw_shit():
@@ -72,6 +73,8 @@ def draw_shit():
     last_synced = 'Never'
     data_list = []
 
+    view_setup = False
+
     to_be_scanned = {}
 
     point_recorded = False
@@ -80,6 +83,9 @@ def draw_shit():
     screen.blit(logo, ((screen_size[0] - logo.get_width()) // 2, (screen_size[1] - logo.get_height()) // 2))
     display.flip()
     time.wait(200)
+
+    if not points:
+        mode = 'data'
 
     while True:
         mb = mouse.get_pressed()
@@ -185,6 +191,8 @@ def draw_shit():
             if keys_shit[K_1]:
                 mode = 'viewing'
 
+                view_setup = False
+
             if keys_shit[K_2]:
                 mode = 'data'
 
@@ -205,12 +213,24 @@ def draw_shit():
             if keys_shit[K_5] and mode == 'scanning' and not point_recorded:
                 point_recorded = True
 
-                points[highlighted_point]['aps'] = wifi_manager.dump_aps('wlp0s20f3')
+                points[highlighted_point]['aps'] = wifi_manager.dump_aps('wlp0s20f3', 1)
 
                 del to_be_scanned[highlighted_point]
 
             elif not keys_shit[K_5]:
                 point_recorded = False
+
+            if mode == 'viewing' and not view_setup:
+                view_setup = True
+
+                calculationshit.Initialize(points, None, None, [])
+
+            if mode == 'viewing':
+                calculatedPosition = calculationshit.findLocation(wifi_manager.dump_aps('wlp0s20f3', 0.5))
+
+                update_map()
+
+                print('POSITION!: ', calculatedPosition)
 
             data_list = [
                 'MODE: ' + mode,
@@ -261,6 +281,11 @@ def draw_shit():
 
                 draw.circle(dot_surf, color,
                             (int(new_map_img.get_width() * rx), int(new_map_img.get_height() * ry)), 5)
+
+
+            if mode == 'viewing':
+                draw.circle(dot_surf, (0, 0, 255),
+                        (int(new_map_img.get_width() * calculatedPosition[0]), int(new_map_img.get_height() * calculatedPosition[1])), 5)
 
             screen.blit(dot_surf, pos)
 
