@@ -9,7 +9,6 @@ from firebase_admin import credentials
 
 
 def draw_shit():
-
     init()
 
     map_img = image.load("notcoding.jpg")
@@ -76,7 +75,6 @@ def draw_shit():
 
                     for p in points:
                         dist = hypot(p[0] - mx, p[1] - my)
-                        print(dist)
                         if dist < 0.005 and dist < minval:
                             minpoint = p
                             minval = dist
@@ -100,7 +98,6 @@ def draw_shit():
 
                     for p in points:
                         dist = hypot(p[0] - mx, p[1] - my)
-                        print(dist)
                         if dist < 0.005 and dist < minval:
                             minpoint = p
                             minval = minpoint
@@ -113,11 +110,9 @@ def draw_shit():
                             points.append([mx, my])
 
                     else:
-                        print(minpoint)
                         pos[0] += screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * minpoint[0]))
                         pos[1] += screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * minpoint[1]))
                         new_map_rect.topleft = pos
-
 
                     unsaved_changes = True
 
@@ -211,7 +206,6 @@ def draw_shit():
 
 
 if __name__ == '__main__':
-
     cred = credentials.Certificate('firebase_key.json')
     firebase_admin.initialize_app(cred)
 
