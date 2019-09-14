@@ -43,7 +43,7 @@ class RefPoint:
 #sc = scale of pixels in a meter
 #pairs = list of all ref point ID pairs that make an edge
 #rlocs = list of all the positions of rps
-def Initialize(rp, fp, sc, pairs, rlocs):
+def Initialize(rp, fp, sc, pairs):
     global floorPlan, scale, refPoints, curLocation, graph, closestNode, refCount
     floorPlan = fp
     scale = sc #How many pixels are in a meter
