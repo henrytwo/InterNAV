@@ -27,16 +27,18 @@ def draw_shit():
         # pos[0] += screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0]))
         # pos[1] += screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1]))
 
-        x_movement = screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0]))
-        y_movement = screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1]))
+        x_movement = int(screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * p[0])))
+        y_movement = int(screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * p[1])))
 
+        print('moving x')
         for x in range(x_movement):
-            pos[0] += 1 * x_movement / abs(x_movement)
+            pos[0] += x_movement / abs(x_movement)
             update_map()
             display.update()
 
+        print('moving y')
         for y in range(y_movement):
-            pos[1] += 1 * y_movement / abs(y_movement)
+            pos[1] += y_movement / abs(y_movement)
             update_map()
             display.update()
 
