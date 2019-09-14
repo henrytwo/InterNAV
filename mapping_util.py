@@ -18,6 +18,6 @@ def get_start_dims(img, new_width=1280, new_height=720):
     img_ratio = img.get_width() / img.get_height()
 
     if screen_ratio > img_ratio:  # if screen is a "wider" image than supplied image
-        return round(img.get_width() * new_height / img.get_height()), new_height
+        return [round(img.get_width() * new_height / img.get_height()), new_height]
     else:  # if screen is less wide than the image
-        return new_width, round(img.get_height() * new_width / img.get_width())
+        return [new_width, round(img.get_height() * new_width / img.get_width())]
