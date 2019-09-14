@@ -18,7 +18,7 @@ class RefPoint:
     def __init__(self, ID, signalList, pos):
         self.ID = ID #Random unique ID
         self.signalList = signalList #Contains AP db's and freqs
-        self.pos = pos #XY pos on map, go by pixels
+        self.pos = pos #XY pos on map, go by 0-1 scale
 
     def getError(self, locList):
         tot = 0
@@ -44,19 +44,27 @@ graph = None
 
         
 
-
+#rp = ref point list
+#fp = floor plan
+#sc = scale of pixels in a meter
+#pairs = list of all ref point ID pairs that make an edge
 def Initialize(rp, fp, sc, pairs):
     floorPlan = fp
     scale = sc #How many pixels are in a meter
 
     #List of all ref points (~75)?
-    repPoints = rp
-    #refPoints = [RefPoint(0, {"00-D0-56-F2-B5-12 or 00-26-DD-14-C4-EE":250}, (232, 356)),
-    #             RefPoint(1, {"25-D5-56-F2-B8-12 or 00-26-DD-14-C4-EF":450}, (335, 358)),
-    #             RefPoint(2, {"35-D5-56-F2-B8-12 or 00-26-DD-14-C4-EF":750}, (385, 328)),
-    #             RefPoint(3, {"27-D5-56-F2-B8-12 or 00-26-DD-14-C4-EF":0}, (435, 158)),
-    #             RefPoint(4, {"29-D5-56-F2-B8-12 or 00-26-DD-14-C4-EF":0}, (255, 258)),
-    #            RefPoint(5, {"45-D5-56-F2-B8-12 or 00-26-DD-14-C4-EF":320}, (319, 458))]
+    #each ref point contains 3 things: an ID, a signal list to all AP's, and a location scaled from 0 to 1 (ignore pixel coords currently there)
+    refPoints = []
+    for i in range(len(rp)):
+        refPoints.append(RefPoint(i, rp[i][0], rp[i][1]))
+    #refPoints = [
+    #             RefPoint(0, {"00-D0-56-F2-B5-12":250, "00-D0-56-F2-B5-12":250}, (232, 356)),
+    #             RefPoint(1, {"25-D5-56-F2-B8-12":450, "00-D0-56-F2-B5-12":250}, (335, 358)),
+    #             RefPoint(2, {"35-D5-56-F2-B8-12":750, "00-D0-56-F2-B5-12":250}, (385, 328)),
+    #             RefPoint(3, {"27-D5-56-F2-B8-12":0, "00-D0-56-F2-B5-12":250}, (435, 158)),
+    #             RefPoint(4, {"29-D5-56-F2-B8-12":0, "00-D0-56-F2-B5-12":250}, (255, 258)),
+    #             RefPoint(5, {"45-D5-56-F2-B8-12, "00-D0-56-F2-B5-12":250}, (319, 458))
+    #            ]
 
     # address:[(address, dist), (address, dist)]
     # Ref points and what each ref point is connected to
@@ -79,14 +87,14 @@ def findLocation(locSigs):
     #Gets nodes whose avg error / AP signal are lowest
     temp = []
     for r in refPoints:
-        temp.append((getError(r, locSigs), r.ID, r.pos))
+        temp.append((r.getError(locSigs), r.ID, r.pos))
     temp.sort()
     topNodeIDs = temp[:nodeBreadth]
 
     pointA = topNodeIDs[0][2]
     pointB = topeNodeIDs[1][2]
-    totError = topNodeIDs[0][0] + topNodeIDs[1][0]+0.002
-    loc = (pointA[0] + pointB[0]*((topNodeIDs[0][0]+0.001)/totError), pointA[1] + pointB[1]*((topNodeIDs[0][0]+0.001)/totError))
+    totError = topNodeIDs[0][0] + topNodeIDs[1][0]+2
+    loc = (pointA[0] + pointB[0]*((topNodeIDs[0][0]+1)/totError), pointA[1] + pointB[1]*((topNodeIDs[0][0]+1)/totError))
     return loc
 
     
