@@ -34,7 +34,7 @@ def draw_shit():
     init()
 
     map_img = image.load("notcoding.jpg")
-    logo = transform.scale(image.load("logo.png"), (600, 450))
+    logo = transform.scale(image.load("InterNAV.png"), (600, 450))
     screen_size = get_start_dims(map_img)
     img_w, img_h = map_img.get_size()
     p_w, p_h = img_w * 0.05, img_h * 0.05
@@ -240,7 +240,6 @@ def draw_shit():
 
                     if unsaved_changes:
                         firebase_sync()
-
 
 
 
