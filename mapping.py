@@ -1,5 +1,6 @@
 from mapping_util import *
 from pygame import *
+from math import hypot
 
 init()
 
@@ -41,6 +42,26 @@ while True:
         elif e.type == MOUSEBUTTONDOWN:
             if e.button == 1:
                 clicked = True
+            if e.button == 3:
+                mx, my = e.pos
+                mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
+                my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
+
+                minpoint = ()
+                minval = 99999
+
+                for p in points:
+                    dist = hypot(p[0] - mx, p[1] - my)
+                    print(dist)
+                    if dist < 0.005 and dist < minval:
+                        minpoint = p
+                        minval = minpoint
+
+                if minpoint != ():
+                    points -= {minpoint}
+                    draw.circle(dot_surf, (0, 0, 0, 0), (int(new_map_img.get_width() * minpoint[0]), int(new_map_img.get_height() * minpoint[1])), 5)
+
+
 
         elif e.type == MOUSEBUTTONUP:
             if e.button == 1:
@@ -95,6 +116,7 @@ while True:
         pos[1] = max(min(pos[1], screen_size[1]-160), 160-new_map_img.get_height())
 
         screen.blit(new_map_img, pos)
+
         for rx, ry in points:
             draw.circle(dot_surf, (255, 0, 0), (int(new_map_img.get_width() * rx), int(new_map_img.get_height() * ry)), 5)
         screen.blit(dot_surf, pos)
