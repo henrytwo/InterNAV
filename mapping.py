@@ -105,7 +105,7 @@ def draw_screen():
                             minpoint = p
                             minval = minpoint
 
-                    if minpoint != ():
+                    if minpoint == ():
                         if not click_and_drag and new_map_rect.collidepoint(e.pos):
                             mx, my = e.pos
                             mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
