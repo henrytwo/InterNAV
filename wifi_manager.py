@@ -46,15 +46,15 @@ def dump_aps(interface):
 
         final[a] = abs(s / len(accumulator[a]))
 
-    return final
-
     airodump.terminate()
+
+    return final
 
 if __name__ == '__main__':
 
     while True:
         try:
 
-            pprint.pprint(dump_aps('wlp0s20f3'))
+            pprint.pprint(dump_aps('wlp0s20f3mon'))
         except:
             pass
