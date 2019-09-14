@@ -26,11 +26,11 @@ def draw_shit():
         new_map_rect.topleft = pos
 
     def update_map():
-        nonlocal new_map_img, new_map_rect, dot_surf
+        nonlocal new_map_img, new_map_rect, markup_surf
         new_map_img = transform.rotozoom(map_img, angle, screen_zoom * manual_zoom)
         new_map_rect.size = new_map_img.get_size()
         new_map_rect.topleft = pos
-        dot_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
+        markup_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
 
     init()
 
@@ -59,13 +59,16 @@ def draw_shit():
     new_map_img = transform.rotozoom(map_img, angle, screen_zoom * manual_zoom)
     new_map_rect = new_map_img.get_rect()
     new_map_rect.topleft = pos
-    dot_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
+    markup_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
 
     text = font.SysFont("Comic Sans MS", 20, bold=True, italic=True)
 
     click_and_drag = False
 
     points = firebase_manager.get_nodes()
+
+    edges = []
+    current_edge = []
 
     if not points:
         points = {}
@@ -116,14 +119,14 @@ def draw_shit():
 
                     if minpoint != ():
                         del points[firebase_manager.generate_id(minpoint)]
-                        draw.circle(dot_surf, (0, 0, 0, 0), (
+                        draw.circle(markup_surf, (0, 0, 0, 0), (
                             int(new_map_img.get_width() * minpoint[0]),
                             int(new_map_img.get_height() * minpoint[1])), 5)
 
                     unsaved_changes = True
 
             elif e.type == MOUSEBUTTONUP:
-                if e.button == 1 and mode == 'data':
+                if e.button in [1, 2]:
                     mx, my = e.pos
                     mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
                     my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
@@ -154,7 +157,13 @@ def draw_shit():
                             }
 
                     else:
-                        center(minpoint)
+                        if e.button == 1:
+                            center(minpoint)
+                        elif e.button == 2:
+                            current_edge.append(firebase_manager.generate_id(minpoint))
+                            if len(current_edge) == 2:
+                                edges.append(current_edge)
+                                current_edge = []
 
                     unsaved_changes = True
 
@@ -196,10 +205,10 @@ def draw_shit():
 
                 view_setup = False
 
-            if keys_shit[K_2]:
+            elif keys_shit[K_2]:
                 mode = 'data'
 
-            if keys_shit[K_3]:
+            elif keys_shit[K_3]:
                 mode = 'scanning'
 
                 to_be_scanned = copy.deepcopy(points)
@@ -210,10 +219,10 @@ def draw_shit():
                     if 'aps' in to_be_scanned[i]:
                         del to_be_scanned[i]
 
-            if keys_shit[K_4]:
+            elif keys_shit[K_4]:
                 firebase_sync()
 
-            if keys_shit[K_5] and mode == 'scanning' and not point_recorded:
+            elif keys_shit[K_5] and mode == 'scanning' and not point_recorded:
                 point_recorded = True
 
                 points[highlighted_point]['aps'] = wifi_manager.dump_aps('wlp0s20f3', 1)
@@ -264,9 +273,6 @@ def draw_shit():
                     if unsaved_changes:
                         firebase_sync()
 
-
-
-
             screen.fill((0, 0, 0))
             pos[0] = max(min(pos[0], screen_size[0] - 160), 160 - new_map_img.get_width())
             pos[1] = max(min(pos[1], screen_size[1] - 160), 160 - new_map_img.get_height())
@@ -282,15 +288,21 @@ def draw_shit():
                 else:
                     color = (255, 0, 0)
 
-                draw.circle(dot_surf, color,
+                draw.circle(markup_surf, color,
                             (int(new_map_img.get_width() * rx), int(new_map_img.get_height() * ry)), 5)
 
+            for id1, id2 in edges:
+                (rx1, ry1), (rx2, ry2) = points[id1]['location'], points[id2]['location']
+                draw.line(markup_surf, (0, 255, 255),
+                          (int(new_map_img.get_width() * rx1), int(new_map_img.get_height() * ry1)),
+                          (int(new_map_img.get_width() * rx2), int(new_map_img.get_height() * ry2)))
 
             if mode == 'viewing':
-                draw.circle(dot_surf, (0, 0, 255),
-                        (int(new_map_img.get_width() * calculatedPosition[0]), int(new_map_img.get_height() * calculatedPosition[1])), 5)
+                draw.circle(markup_surf, (0, 0, 255),
+                            (int(new_map_img.get_width() * calculatedPosition[0]),
+                             int(new_map_img.get_height() * calculatedPosition[1])), 5)
 
-            screen.blit(dot_surf, pos)
+            screen.blit(markup_surf, pos)
 
             for i, data in enumerate(data_list):
                 screen.blit(text.render(data, True, (0, 0, 0), (200, 200, 200)), (20, 20 + 30 * i))

@@ -7,19 +7,19 @@ import uuid
 
 COLLECTION_NAME = 'map1'
 
+
 def generate_id(p):
-    return ''.join([str(x).replace('.','|') for x in p])
+    return ''.join([str(x).replace('.', '|') for x in p])
+
 
 def set_nodes(nodes):
-
-
     firebase_admin.firestore.client(app=None) \
         .collection(COLLECTION_NAME) \
         .document('nodes') \
         .set(nodes)
 
-def add_node_data(name, data):
 
+def add_node_data(name, data):
     """
     :param name: dis is da node name
     :param data: dis is da dict with da {macaddress: db and other stuff}
@@ -57,6 +57,7 @@ def get_nodes():
     
     """
 
+
 def get_edges():
     edges = firebase_admin.firestore.client(app=None) \
         .collection(COLLECTION_NAME) \
@@ -76,4 +77,3 @@ def add_edge(node1, node2):
         .collection(COLLECTION_NAME) \
         .document('edges') \
         .update({str(uuid.uuid4()): [node1, node2]})
-
