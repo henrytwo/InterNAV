@@ -105,21 +105,37 @@ def findLocation(abd):
     locSigs = {}
     for _ in range(3):
         locSigs[aps[_][1]] = aps[_][0]
-
-    nodeBreadth = 2 #Number of nodes whose paths are being checked
-
-    #Gets nodes whose avg error / AP signal are lowest
+##############
     temp = []
-    for r in refPoints:
-        temp.append((r.getError(locSigs), r.ID, r.pos))
-    temp.sort()
-    topNodeIDs = temp[:nodeBreadth]
+    for e in pairs:
+        a = refPoints[e[0]]
+        b = refPoints[e[1]]
+        tot = a.getError(locSigs)+b.getError(locSigs)
+        temp.append((tot, a.ID, b.ID, a.pos, b.pos))
 
-    pointA = topNodeIDs[0][2]
-    pointB = topNodeIDs[1][2]
-    totError = topNodeIDs[0][0] + topNodeIDs[1][0]+2
-    curLocation = (pointA[0] + (pointB[0]-pointA[0])*((topNodeIDs[0][0]+1)/totError), pointA[1] + (pointB[1]-pointA[1])*((topNodeIDs[0][0]+1)/totError))
-    closestNode = topNodeIDs[0]
+    topNodeIDs = min(temp)
+    pointA = topNodeIDs[1]
+    pointB = topNodeIDs[2]
+    totError = topNodeIDs[0]+2
+    x = topNodeIDs[3]
+    y = topNodeIDs[4]
+    curLocation = (x[0] + (y[0]-x[0])*((pointA.getError(locSigs)+1)/totError), x[1] + (y[1]-x[1])*((pointA.getError(locSigs)+1)/totError))
+    closestNode = topNodeIDs[3]
+##############    
+##    nodeBreadth = 2 #Number of nodes whose paths are being checked
+##
+##    #Gets nodes whose avg error / AP signal are lowest
+##    temp = []
+##    for r in refPoints:
+##        temp.append((r.getError(locSigs), r.ID, r.pos))
+##    temp.sort()
+##    topNodeIDs = temp[:nodeBreadth]
+##
+##    pointA = topNodeIDs[0][2]
+##    pointB = topNodeIDs[1][2]
+##    totError = topNodeIDs[0][0] + topNodeIDs[1][0]+2
+##    curLocation = (pointA[0] + (pointB[0]-pointA[0])*((topNodeIDs[0][0]+1)/totError), pointA[1] + (pointB[1]-pointA[1])*((topNodeIDs[0][0]+1)/totError))
+##    closestNode = topNodeIDs[0]
     
     return curLocation
 
@@ -127,7 +143,7 @@ def findLocation(abd):
 
 #Destination should be a ref point ID
 def getPath(destination):
-    lineSegList = [(closestNode[2], curLocation)]
+    lineSegList = [(closestNode, curLocation)]
     dists = [(99999, []) for i in range(refCount)]
     dists[closestNode[1]] = (0, [])
     points = Queue()
