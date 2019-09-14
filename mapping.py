@@ -3,10 +3,12 @@ from pygame import *
 from math import hypot
 import firebase_manager
 
+
 import firebase_admin
 from firebase_admin import credentials
 
-def draw_shit():
+
+def draw_screen():
     cred = credentials.Certificate('firebase_key.json')
     firebase_admin.initialize_app(cred)
 
@@ -33,18 +35,22 @@ def draw_shit():
     new_map_rect.topleft = pos
     dot_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
 
+    text = font.SysFont("Comic Sans MS", 20, bold=True, italic=True)
+
     click_and_drag = False
 
     raw_points = firebase_manager.get_nodes()
 
     points = []
 
+    data_list = []
+
     if raw_points:
         for i in raw_points:
             points.append(raw_points[i]['location'])
 
     screen.fill((200, 200, 255))
-    screen.blit(logo, ((screen_size[0]-logo.get_width())//2, (screen_size[1]-logo.get_height())//2))
+    screen.blit(logo, ((screen_size[0] - logo.get_width()) // 2, (screen_size[1] - logo.get_height()) // 2))
     display.flip()
     time.wait(2000)
 
@@ -55,27 +61,26 @@ def draw_shit():
                 break
             elif e.type == MOUSEBUTTONDOWN:
                 if e.button == 1:
-                    clicked = True
-                if e.button == 3:
-                    mx, my = e.pos
-                    mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
-                    my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
+                    if e.button == 3:
+                        mx, my = e.pos
+                        mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
+                        my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
 
-                    minpoint = ()
-                    minval = 99999
+                        minpoint = ()
+                        minval = 99999
 
-                    for p in points:
-                        dist = hypot(p[0] - mx, p[1] - my)
-                        print(dist)
-                        if dist < 0.005 and dist < minval:
-                            minpoint = p
-                            minval = minpoint
+                        for p in points:
+                            dist = hypot(p[0] - mx, p[1] - my)
+                            print(dist)
+                            if dist < 0.005 and dist < minval:
+                                minpoint = p
+                                minval = minpoint
 
-                    if minpoint != ():
-                        points -= {minpoint}
-                        draw.circle(dot_surf, (0, 0, 0, 0), (int(new_map_img.get_width() * minpoint[0]), int(new_map_img.get_height() * minpoint[1])), 5)
-
-
+                        if minpoint != ():
+                            points -= {minpoint}
+                            draw.circle(dot_surf, (0, 0, 0, 0), (
+                                int(new_map_img.get_width() * minpoint[0]),
+                                int(new_map_img.get_height() * minpoint[1])), 5)
 
             elif e.type == MOUSEBUTTONUP:
                 if e.button == 1:
@@ -107,7 +112,6 @@ def draw_shit():
                         new_map_rect.topleft = pos
                         dot_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
 
-                clicked = False
                 click_and_drag = False
             elif e.type == MOUSEMOTION:
                 if mb[0]:
@@ -128,17 +132,21 @@ def draw_shit():
 
         else:
             screen.fill((0, 0, 0))
-            pos[0] = max(min(pos[0], screen_size[0]-160), 160-new_map_img.get_width())
-            pos[1] = max(min(pos[1], screen_size[1]-160), 160-new_map_img.get_height())
+            pos[0] = max(min(pos[0], screen_size[0] - 160), 160 - new_map_img.get_width())
+            pos[1] = max(min(pos[1], screen_size[1] - 160), 160 - new_map_img.get_height())
 
             screen.blit(new_map_img, pos)
 
             for rx, ry in points:
-                draw.circle(dot_surf, (255, 0, 0), (int(new_map_img.get_width() * rx), int(new_map_img.get_height() * ry)), 5)
+                draw.circle(dot_surf, (255, 0, 0),
+                            (int(new_map_img.get_width() * rx), int(new_map_img.get_height() * ry)), 5)
             screen.blit(dot_surf, pos)
 
+            for i, data in enumerate(data_list):
+                screen.blit(text.render(data, True, (0, 0, 0), (200, 200, 200)), (20, 20 + 30 * i))
+
             clock.tick()
-            display.set_caption(f"InterNAV      FPS: {int(clock.get_fps())}")
+            display.set_caption(f"InterNAV | FPS: {int(clock.get_fps())}")
             display.update()
             continue
 
@@ -146,5 +154,6 @@ def draw_shit():
 
     display.quit()
 
+
 if __name__ == '__main__':
-    draw_shit()
+    draw_screen()

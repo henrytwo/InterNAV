@@ -21,5 +21,5 @@ calculationshit.Initialize(firebase_manager.get_nodes(), None, None, firebase_ma
 
 #    print(str(datetime.now()), calculationshit.findLocation(shit))
 
-shit_process = multiprocessing.Process(target=mapping.draw_shit, args=())
+shit_process = multiprocessing.Process(target=mapping.draw_screen, args=())
 shit_process.start()
