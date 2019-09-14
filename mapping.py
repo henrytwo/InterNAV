@@ -3,14 +3,14 @@ from pygame import *
 
 init()
 
-map_img = image.load('notcoding.jpg')
-
+map_img = image.load("notcoding.jpg")
+logo = transform.scale(image.load("logo.png"), (600, 450))
 screen_size = get_start_dims(map_img)
 img_w, img_h = map_img.get_size()
 p_w, p_h = img_w * 0.05, img_h * 0.05
 
 screen = display.set_mode(screen_size, RESIZABLE)
-display.set_caption('geiii')
+display.set_caption("InterNAV")
 
 clock = time.Clock()
 
@@ -28,6 +28,11 @@ click_and_drag = False
 
 points = set()
 
+screen.fill((200, 200, 255))
+screen.blit(logo, ((screen_size[0]-logo.get_width())//2, (screen_size[1]-logo.get_height())//2))
+display.flip()
+time.wait(2000)
+
 while True:
     mb = mouse.get_pressed()
     for e in event.get():
@@ -44,7 +49,7 @@ while True:
                     mx = (mx - pos[0]) / ((screen_zoom * manual_zoom) * map_img.get_width())
                     my = (my - pos[1]) / ((screen_zoom * manual_zoom) * map_img.get_height())
                     points.add((mx, my))
-                    print((mx, my))
+                    
             elif e.button == 4:
                 if manual_zoom < 2:
                     manual_zoom += 0.05
@@ -86,8 +91,8 @@ while True:
 
     else:
         screen.fill((0, 0, 0))
-        pos[0] = max(min(pos[0], new_map_img.get_width()-160), 160-new_map_img.get_width())
-        pos[1] = max(min(pos[1], new_map_img.get_height()-160), 160-new_map_img.get_height())
+        pos[0] = max(min(pos[0], screen_size[0]-160), 160-new_map_img.get_width())
+        pos[1] = max(min(pos[1], screen_size[1]-160), 160-new_map_img.get_height())
 
         screen.blit(new_map_img, pos)
         for rx, ry in points:
@@ -95,7 +100,7 @@ while True:
         screen.blit(dot_surf, pos)
 
         clock.tick()
-        display.set_caption(f'2cool {clock.get_fps()}')
+        display.set_caption(f"InterNAV      FPS: {int(clock.get_fps())}")
         display.update()
         continue
 
