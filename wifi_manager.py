@@ -14,7 +14,7 @@ def dump_aps(interface, timeout):
     line_start = re.compile('[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}')
     start_time = time.time()
 
-    airodump = subprocess.Popen(['airodump-ng', interface, '-c', '1,11'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, bufsize=1)
+    airodump = subprocess.Popen(['airodump-ng', interface, '-c', '1,11', '-N', 'eduroam'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, bufsize=1)
 
     accumulator = {}
 

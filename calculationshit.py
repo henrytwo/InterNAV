@@ -46,11 +46,11 @@ class RefPoint:
 #sc = scale of pixels in a meter
 #pairs = list of all ref point ID pairs that make an edge
 #rlocs = list of all the positions of rps
-def Initialize(rp, fp, sc, pairs):
-    global floorPlan, scale, refPoints, curLocation, graph, closestNode, refCount
+def Initialize(rp, fp, sc, p):
+    global floorPlan, scale, refPoints, curLocation, graph, closestNode, refCount, pairs, edges
     floorPlan = fp
     scale = sc #How many pixels are in a meter
-
+    pairs = p
 
 
     #List of all  points (~75)?
@@ -61,22 +61,25 @@ def Initialize(rp, fp, sc, pairs):
     pairToIndex = {}
     for k in rp.keys():
         aps = []
-        for a in rp[k]["aps"].keys():
-            aps.append([abs(rp[k]["aps"][a]), a])
-            if aps[-1][0] == 1:
-                aps[-1][0] = 120
-        aps.sort()
-        apd = {}
-        for _ in range(5):
-            apd[aps[_][1]] = aps[_][0]
-        refPoints.append(RefPoint(w, apd, rp[k]["location"]))
-        pairToIndex[k] = w
-        w += 1
+
+        if 'aps' in rp[k]:
+
+            for a in rp[k]["aps"].keys():
+                aps.append([abs(rp[k]["aps"][a]), a])
+                if aps[-1][0] == 1:
+                    aps[-1][0] = 120
+            aps.sort()
+            apd = {}
+            for _ in range(min(5, len(aps))):
+                apd[aps[_][1]] = aps[_][0]
+            refPoints.append(RefPoint(w, apd, rp[k]["location"]))
+            pairToIndex[k] = w
+            w += 1
 
     #Make edges list
     edges = []
     for i in range(len(pairs)):
-        edges.append((pairToIndex[pairs[0]], pairToIndex[pairs[1]]))
+        edges.append((pairToIndex[pairs[i][0]], pairToIndex[pairs[i][1]]))
         
 
     # address:[(address, dist), (address, dist)]
@@ -106,23 +109,25 @@ def findLocation(abd):
             aps[-1][0] = 120
     aps.sort()
     locSigs = {}
-    for _ in range(5):
+    for _ in range(min(5, len(aps))):
         locSigs[aps[_][1]] = aps[_][0]
 ##############
     temp = []
-    for e in pairs:
+
+    for e in edges:
         a = refPoints[e[0]]
         b = refPoints[e[1]]
         tot = a.getError(locSigs)+b.getError(locSigs)
         temp.append((tot, a.ID, b.ID, a.pos, b.pos))
 
     topNodeIDs = min(temp)
+    print(topNodeIDs)
     pointA = topNodeIDs[1]
     pointB = topNodeIDs[2]
     totError = topNodeIDs[0]+2
     x = topNodeIDs[3]
     y = topNodeIDs[4]
-    curLocation = (x[0] + (y[0]-x[0])*((pointA.getError(locSigs)+1)/totError), x[1] + (y[1]-x[1])*((pointA.getError(locSigs)+1)/totError))
+    curLocation = (x[0] + (y[0]-x[0])*((refPoints[pointA].getError(locSigs)+1)/totError), x[1] + (y[1]-x[1])*((refPoints[pointA].getError(locSigs)+1)/totError))
     closestNode = topNodeIDs[3]
 ##############    
 ##    nodeBreadth = 2 #Number of nodes whose paths are being checked

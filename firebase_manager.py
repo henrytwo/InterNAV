@@ -5,7 +5,7 @@ from firebase_admin import auth
 from datetime import datetime
 import uuid
 
-COLLECTION_NAME = 'map1'
+COLLECTION_NAME = 'map'
 
 
 def generate_id(p):

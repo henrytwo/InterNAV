@@ -239,7 +239,7 @@ def draw_shit():
             elif keys_shit[K_5] and mode == 'scanning' and not point_recorded:
                 point_recorded = True
 
-                points[highlighted_point]['aps'] = wifi_manager.dump_aps('wlp0s20f3', 1)
+                points[highlighted_point]['aps'] = wifi_manager.dump_aps('wlp0s20f3', 3)
 
                 del to_be_scanned[highlighted_point]
 
@@ -249,10 +249,10 @@ def draw_shit():
             if mode == 'viewing' and not view_setup:
                 view_setup = True
 
-                calculationshit.Initialize(points, None, None, [])
+                calculationshit.Initialize(points, None, None, edges)
 
             if mode == 'viewing':
-                calculatedPosition = calculationshit.findLocation(wifi_manager.dump_aps('wlp0s20f3', 1))
+                calculatedPosition = calculationshit.findLocation(wifi_manager.dump_aps('wlp0s20f3', 3))
 
                 update_map()
 
