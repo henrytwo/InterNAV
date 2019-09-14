@@ -138,9 +138,6 @@ def draw_shit():
 
                     else:
                         center(minpoint)
-                        # pos[0] += screen_size[0] // 2 - (pos[0] + int(new_map_img.get_width() * minpoint[0]))
-                        # pos[1] += screen_size[1] // 2 - (pos[1] + int(new_map_img.get_height() * minpoint[1]))
-                        # new_map_rect.topleft = pos
 
                     unsaved_changes = True
 
@@ -149,10 +146,7 @@ def draw_shit():
                         manual_zoom += 0.05
                         pos[0] -= int((abs(e.pos[0]) / img_w) * p_w)
                         pos[1] -= int((abs(e.pos[1]) / img_h) * p_h)
-                        new_map_img = transform.rotozoom(map_img, angle, screen_zoom * manual_zoom)
-                        new_map_rect.size = new_map_img.get_size()
-                        new_map_rect.topleft = pos
-                        dot_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
+                        update_map()
 
                 elif e.button == 5:
                     if manual_zoom > 0.25:
@@ -160,10 +154,6 @@ def draw_shit():
                         pos[0] += int((abs(e.pos[0]) / img_w) * p_w)
                         pos[1] += int((abs(e.pos[1]) / img_h) * p_h)
                         update_map()
-                        # new_map_img = transform.rotozoom(map_img, angle, screen_zoom * manual_zoom)
-                        # new_map_rect.size = new_map_img.get_size()
-                        # new_map_rect.topleft = pos
-                        # dot_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
 
                 click_and_drag = False
             elif e.type == MOUSEMOTION:
@@ -178,10 +168,6 @@ def draw_shit():
                 screen_size[1] = max(600, e.size[1])
                 screen_zoom = get_zoom(map_img, *screen_size)
                 update_map()
-                # new_map_img = transform.rotozoom(map_img, angle, screen_zoom * manual_zoom)
-                # new_map_rect.size = new_map_img.get_size()
-                # new_map_rect.topleft = pos
-                # dot_surf = Surface(new_map_img.get_size(), SRCALPHA, 32)
                 display.set_mode(screen_size, RESIZABLE)
 
         else:
