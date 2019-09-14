@@ -15,10 +15,14 @@ def find_wifi(interface, d):
     line_start = re.compile('[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}')
     start_time = time.time()
 
-    airodump = subprocess.Popen(['airodump-ng', interface, '-c', '1,6,11'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, bufsize=1)
+    airodump = subprocess.Popen(['airodump-ng', interface, '-c', '153'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, bufsize=1)
 
     while time.time() < start_time + timeout:
+
         line = airodump.stdout.readline().strip('\n')
+
+        #print(line)
+
         if table_start.match(line):
             #print(datetime.datetime.now())
             #pprint.pprint(d)
@@ -37,7 +41,9 @@ def get_node_data(d):
 
     accumulated_data = {}
 
-    while time.time() - start_time < 3:
+    while time.time() - start_time < 1:
+        print(d)
+
         for a in d:
             if a not in accumulated_data:
                 accumulated_data[a] = []
@@ -51,7 +57,7 @@ if __name__ == '__main__':
 
     d = manager.dict()
 
-    p1 = Process(target=find_wifi, args=('wlp0s20f0u1', d))
+    p1 = Process(target=find_wifi, args=('wlp0s20f3', d))
 
     p1.start()
 
