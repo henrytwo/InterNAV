@@ -3,8 +3,9 @@ from pygame import *
 from math import hypot
 import firebase_manager
 import datetime
-
+import copy
 import firebase_admin
+import wifi_manager
 from firebase_admin import credentials
 
 def draw_shit():
@@ -54,6 +55,10 @@ def draw_shit():
     unsaved_changes = False
     last_synced = 'Never'
     data_list = []
+
+    to_be_scanned = {}
+
+    point_recorded = False
 
     screen.fill((200, 200, 255))
     screen.blit(logo, ((screen_size[0] - logo.get_width()) // 2, (screen_size[1] - logo.get_height()) // 2))
@@ -183,6 +188,12 @@ def draw_shit():
             if keys_shit[K_3]:
                 mode = 'scanning'
 
+                to_be_scanned = copy.deepcopy(points)
+
+                for i in copy.deepcopy(to_be_scanned):
+                    if 'aps' in to_be_scanned[i]:
+                        del to_be_scanned[i]
+
             if keys_shit[K_4]:
                 print('FIREBASE SYNCED!')
 
@@ -191,11 +202,29 @@ def draw_shit():
 
                 firebase_manager.set_nodes(points)
 
+            if keys_shit[K_5] and mode == 'scanning' and not point_recorded:
+                point_recorded = True
+
+                points[highlighted_point]['aps'] = wifi_manager.dump_aps('wlp0s20f3')
+
+                del to_be_scanned[highlighted_point]
+
+            elif not keys_shit[K_5]:
+                point_recorded = False
+
             data_list = [
                 'MODE: ' + mode,
                 'LAST SYNCED: ' + last_synced,
                 'UNSAVED CHANGES: ' + str(unsaved_changes)
             ]
+
+            if mode == 'scanning':
+                data_list.append('PLEASE MOVE TO DESIGNATED POSITION AND PRESS 5 TO RECORD POINT!')
+                data_list.append('POINTS REMAINING: ' + str(len(to_be_scanned.keys())))
+
+                highlighted_point = list(to_be_scanned.keys())[0]
+                center(to_be_scanned[highlighted_point]['location'])
+
 
             screen.fill((0, 0, 0))
             pos[0] = max(min(pos[0], screen_size[0] - 160), 160 - new_map_img.get_width())
