@@ -47,12 +47,12 @@ class RefPoint:
 #pairs = list of all ref point ID pairs that make an edge
 #rlocs = list of all the positions of rps
 def Initialize(rp, fp, sc, p):
-    global floorPlan, scale, refPoints, curLocation, graph, closestNode, refCount, pairs, edges
+    global floorPlan, scale, refPoints, curLocation, graph, closestNode, refCount, pairs, edges, tries
     floorPlan = fp
     scale = sc #How many pixels are in a meter
     pairs = p
-
-
+    curLocation = False
+    tries = 0
     #List of all  points (~75)?
     #each ref point contains 3 things: an ID, a signal list to all AP's, and a location scaled from 0 to 1 (ignore pixel coords currently there)
     refPoints = []
@@ -102,6 +102,7 @@ def Initialize(rp, fp, sc, p):
 #locSigs = {1:(1, 1), 2:(3, 5), 4:(9, 2)}
 
 def findLocation(abd):
+    prevLocation = curLocation
     aps = []
     for a in abd.keys():
         aps.append([abs(abd[a]), a])
@@ -145,6 +146,12 @@ def findLocation(abd):
 ##    curLocation = (pointA[0] + (pointB[0]-pointA[0])*((topNodeIDs[0][0]+1)/totError), pointA[1] + (pointB[1]-pointA[1])*((topNodeIDs[0][0]+1)/totError))
 ##    closestNode = topNodeIDs[0]
     
+    if ((curLocation[0]-prevLocation[0])**2 + (curLocation[1]+prevLocation[1])**2)**0.5 > 0.2 and tries != 1 and prevLocation != None:
+        curLocation = prevLocation
+        tries += 1
+    else:
+        tries = 0
+    
     return curLocation
 
     
@@ -163,4 +170,12 @@ def getPath(destination):
                 dists[edge[0]][0] = dists[cur][0]+edge[1]
                 dists[edge[0]][1] = (dists[cur][1]+[(cur, edge[0])])
                 points.put(edge[0])
-    return lineSegList
+    return dists[destination][1]
+
+
+
+
+
+
+
+
