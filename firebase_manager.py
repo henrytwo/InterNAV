@@ -5,9 +5,6 @@ from firebase_admin import auth
 from datetime import datetime
 import uuid
 
-cred = credentials.Certificate('firebase_key.json')
-firebase_admin.initialize_app(cred)
-
 def get_nodes():
     return firebase_admin.firestore.client(app=None) \
         .collection('map') \

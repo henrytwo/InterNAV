@@ -7,7 +7,7 @@ import pprint
 import datetime
 import copy
 
-def find_wifi(interface):
+def dump_aps(interface):
     table = ''
     timeout = 1
 
@@ -15,7 +15,7 @@ def find_wifi(interface):
     line_start = re.compile('[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}:[A-Z0-9]{2}')
     start_time = time.time()
 
-    airodump = subprocess.Popen(['airodump-ng', interface, '-c', '1'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, bufsize=1)
+    airodump = subprocess.Popen(['airodump-ng', interface, '-c', '1,11'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, bufsize=1)
 
     accumulator = {}
 
@@ -43,17 +43,18 @@ def find_wifi(interface):
             except:
                 pass
 
+
         final[a] = abs(s / len(accumulator[a]))
 
     return final
 
     airodump.terminate()
 
-def shit(d):
-    while True:
-        print(d)
-
 if __name__ == '__main__':
 
     while True:
-        pprint.pprint(find_wifi('wlp0s20f3'))
+        try:
+
+            pprint.pprint(dump_aps('wlp0s20f3'))
+        except:
+            pass
