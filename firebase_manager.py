@@ -5,6 +5,8 @@ from firebase_admin import auth
 from datetime import datetime
 import uuid
 
+COLLECTION_NAME = 'map1'
+
 def generate_id(p):
     return ''.join([str(x).replace('.','|') for x in p])
 
@@ -12,7 +14,7 @@ def set_nodes(nodes):
 
 
     firebase_admin.firestore.client(app=None) \
-        .collection('map') \
+        .collection(COLLECTION_NAME) \
         .document('nodes') \
         .set(nodes)
 
@@ -25,7 +27,7 @@ def add_node_data(name, data):
     """
 
     firebase_admin.firestore.client(app=None) \
-        .collection('map') \
+        .collection(COLLECTION_NAME) \
         .document('nodes') \
         .update({
         str(name): {
@@ -36,7 +38,7 @@ def add_node_data(name, data):
 
 def get_nodes():
     return firebase_admin.firestore.client(app=None) \
-        .collection('map') \
+        .collection(COLLECTION_NAME) \
         .document('nodes') \
         .get().to_dict()
 
@@ -57,7 +59,7 @@ def get_nodes():
 
 def get_edges():
     edges = firebase_admin.firestore.client(app=None) \
-        .collection('map') \
+        .collection(COLLECTION_NAME) \
         .document('edges') \
         .get().to_dict()
 
@@ -71,7 +73,7 @@ def get_edges():
 
 def add_edge(node1, node2):
     firebase_admin.firestore.client(app=None) \
-        .collection('map') \
+        .collection(COLLECTION_NAME) \
         .document('edges') \
         .update({str(uuid.uuid4()): [node1, node2]})
 

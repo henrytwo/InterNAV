@@ -57,7 +57,16 @@ def Initialize(rp, fp, sc, pairs):
     w = 0
     pairToIndex = {}
     for k in rp.keys():
-        refPoints.append(RefPoint(w, rp[k]["aps"], rp[k]["location"]))
+        aps = []
+        for a in rp[k]["aps"].keys():
+            aps.append([abs(rp[k]["aps"][a]), a])
+            if aps[-1][0] == 1:
+                aps[-1][0] = 120
+        aps.sort()
+        apd = {}
+        for _ in range(3):
+            apd[aps[_][1]] = aps[_][0]
+        refPoints.append(RefPoint(w, apd, rp[k]["location"]))
         pairToIndex[k] = w
         w += 1
 
@@ -86,7 +95,17 @@ def Initialize(rp, fp, sc, pairs):
 #This is your current location signals to each AP
 #locSigs = {1:(1, 1), 2:(3, 5), 4:(9, 2)}
 
-def findLocation(locSigs):
+def findLocation(abd):
+    aps = []
+    for a in abd.keys():
+        aps.append([abs(abd[a]), a])
+        if abd[a] == 1:
+            aps[-1][0] = 120
+    aps.sort()
+    locSigs = {}
+    for _ in range(3):
+        locSigs[aps[_][1]] = aps[_][0]
+
     nodeBreadth = 2 #Number of nodes whose paths are being checked
 
     #Gets nodes whose avg error / AP signal are lowest

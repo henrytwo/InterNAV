@@ -67,6 +67,9 @@ def draw_shit():
 
     points = firebase_manager.get_nodes()
 
+    if not points:
+        points = {}
+
     highlighted_point = ''
 
     unsaved_changes = False
@@ -226,7 +229,7 @@ def draw_shit():
                 calculationshit.Initialize(points, None, None, [])
 
             if mode == 'viewing':
-                calculatedPosition = calculationshit.findLocation(wifi_manager.dump_aps('wlp0s20f3', 0.5))
+                calculatedPosition = calculationshit.findLocation(wifi_manager.dump_aps('wlp0s20f3', 1))
 
                 update_map()
 
