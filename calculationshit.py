@@ -50,7 +50,7 @@ class RefPoint:
 #pairs = list of all ref point ID pairs that make an edge
 #rlocs = list of all the positions of rps
 def Initialize(rp, fp, sc, p):
-    global floorPlan, scale, refPoints, curLocation, graph, closestNode, refCount, pairs, edges, tries
+    global floorPlan, scale, refPoints, curLocation, graph, closestNode, refCount, pairs, edges, tries, pairToIndex
     floorPlan = fp
     scale = sc #How many pixels are in a meter
     pairs = p
@@ -110,7 +110,7 @@ def Initialize(rp, fp, sc, p):
 #locSigs = {1:(1, 1), 2:(3, 5), 4:(9, 2)}
 
 def findLocation(abd):
-    global curLocation, tries
+    global curLocation, tries, closestNode
 
     prevLocation = curLocation
     aps = []
@@ -139,7 +139,7 @@ def findLocation(abd):
     x = topNodeIDs[3]
     y = topNodeIDs[4]
     curLocation = (x[0] + (y[0]-x[0])*((refPoints[pointA].getError(locSigs)+1)/totError), x[1] + (y[1]-x[1])*((refPoints[pointA].getError(locSigs)+1)/totError))
-    closestNode = topNodeIDs[3]
+    closestNode = (x, topNodeIDs[1])
 ##############    
 ##    nodeBreadth = 2 #Number of nodes whose paths are being checked
 ##
@@ -168,9 +168,12 @@ def findLocation(abd):
     
 
 #Destination should be a ref point ID
-def getPath(destination):
-    lineSegList = [(closestNode, curLocation)]
-    dists = [(99999, []) for i in range(refCount)]
+def getPath(dest):
+    global closestNode
+
+    destination = pairToIndex[dest]
+    lineSegList = [(closestNode[0], curLocation)]
+    dists = [[99999, []] for i in range(refCount)]
     dists[closestNode[1]] = (0, [])
     points = Queue()
     points.put(closestNode[1])
@@ -179,8 +182,11 @@ def getPath(destination):
         for edge in graph[cur]:
             if dists[edge[0]][0] > dists[cur][0]+edge[1]:
                 dists[edge[0]][0] = dists[cur][0]+edge[1]
-                dists[edge[0]][1] = (dists[cur][1]+[(cur, edge[0])])
+                dists[edge[0]][1] = dists[cur][1]+[(cur, edge[0])]
                 points.put(edge[0])
+    print(12345, dists[destination][1])
+    for e in range(len(dists[destination][1])):
+        dists[destination][1][e] = [refPoints[dists[destination][1][e][0]].pos, refPoints[dists[destination][1][e][1]].pos]
     return dists[destination][1]
 
 

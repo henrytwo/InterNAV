@@ -100,7 +100,7 @@ def draw_shit(shared_dict):
     angle = 0
     pos = [0, 0]
 
-    mode = 'data'
+    mode = 'viewing'
 
     # MODES
     # 1 - Viewing map and getting location
@@ -222,6 +222,8 @@ def draw_shit(shared_dict):
                     else:
                         if e.button == 1 and mode == 'viewing':
                             center(minpoint)
+
+                            print(calculationshit.getPath(firebase_manager.generate_id(minpoint)))
                         if e.button == 2:
                             current_edge.append(firebase_manager.generate_id(minpoint))
                             if len(current_edge) == 2:
@@ -309,7 +311,7 @@ def draw_shit(shared_dict):
 
                 update_map()
 
-                print('POSITION!: ', calculatedPosition)
+                #print('POSITION!: ', calculatedPosition)
 
             data_list = [
                 'Keyboard commands: 1-View/Navigation 2-Configuration 3-Scanning 4-Sync with Firebase 5-Record RP',
