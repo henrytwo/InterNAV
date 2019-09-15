@@ -137,6 +137,10 @@ def draw_shit(shared_dict):
 
     point_recorded = False
 
+    navigation_path = None
+
+    last_position = None
+
     screen.fill((200, 200, 255))
     screen.blit(logo, ((screen_size[0] - logo.get_width()) // 2, (screen_size[1] - logo.get_height()) // 2))
     display.flip()
@@ -223,7 +227,7 @@ def draw_shit(shared_dict):
                         if e.button == 1 and mode == 'viewing':
                             center(minpoint)
 
-                            print(calculationshit.getPath(firebase_manager.generate_id(minpoint)))
+                            navigation_path = calculationshit.getPath(firebase_manager.generate_id(minpoint))
                         if e.button == 2:
                             current_edge.append(firebase_manager.generate_id(minpoint))
                             if len(current_edge) == 2:
@@ -269,6 +273,7 @@ def draw_shit(shared_dict):
             if keys_shit[K_1]:
                 mode = 'viewing'
 
+                navigation_path = None
                 view_setup = False
 
             elif keys_shit[K_2]:
@@ -308,6 +313,13 @@ def draw_shit(shared_dict):
             if mode == 'viewing':
                 calculatedPosition = calculationshit.findLocation(
                     shared_dict['data'] if ('data' in shared_dict) else wifi_manager.dump_aps('wlp0s20f3', 3))
+
+
+                if calculatedPosition != last_position and navigation_path:
+                    navigation_path = calculationshit.getPath(firebase_manager.generate_id(minpoint))
+
+                    last_position = copy.deepcopy(calculatedPosition)
+
 
                 update_map()
 
@@ -349,7 +361,7 @@ def draw_shit(shared_dict):
                     if unsaved_changes:
                         firebase_sync()
 
-            screen.fill((0, 0, 0))
+            screen.fill((255,255,255))
             pos[0] = max(min(pos[0], screen_size[0] - 160), 160 - new_map_img.get_width())
             pos[1] = max(min(pos[1], screen_size[1] - 160), 160 - new_map_img.get_height())
 
@@ -363,6 +375,15 @@ def draw_shit(shared_dict):
                               (int(new_map_img.get_width() * rx2), int(new_map_img.get_height() * ry2)))
                 except:
                     update_map()
+
+            if navigation_path:
+                for id1, id2 in navigation_path:
+
+                    (rx1, ry1), (rx2, ry2) = id1, id2
+                    draw.line(markup_surf, (255, 0, 255),
+                              (int(new_map_img.get_width() * rx1), int(new_map_img.get_height() * ry1)),
+                              (int(new_map_img.get_width() * rx2), int(new_map_img.get_height() * ry2)), 5)
+
 
             for pointid in points:
 
@@ -387,7 +408,8 @@ def draw_shit(shared_dict):
                 screen.blit(text.render(data, True, (0, 0, 0), (220, 220, 220)), (20, 20 + 30 * i))
 
             clock.tick()
-            display.set_caption(f"InterNAV | FPS: {int(clock.get_fps())}")
+            #display.set_caption(f"InterNAV | FPS: {int(clock.get_fps())}")
+            display.set_caption(f"InterNAV")
             display.update()
             continue
 

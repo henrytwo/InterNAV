@@ -110,7 +110,7 @@ def Initialize(rp, fp, sc, p):
 #locSigs = {1:(1, 1), 2:(3, 5), 4:(9, 2)}
 
 def findLocation(abd):
-    global curLocation, tries, closestNode
+    global curLocation, tries, closestNode, pointA, pointB
 
     prevLocation = curLocation
     aps = []
@@ -169,25 +169,37 @@ def findLocation(abd):
 
 #Destination should be a ref point ID
 def getPath(dest):
-    global closestNode
+    global pointA, pointB
 
-    destination = pairToIndex[dest]
-    lineSegList = [(closestNode[0], curLocation)]
-    dists = [[99999, []] for i in range(refCount)]
-    dists[closestNode[1]] = (0, [])
-    points = Queue()
-    points.put(closestNode[1])
-    while not points.empty():
-        cur = points.get()
-        for edge in graph[cur]:
-            if dists[edge[0]][0] > dists[cur][0]+edge[1]:
-                dists[edge[0]][0] = dists[cur][0]+edge[1]
-                dists[edge[0]][1] = dists[cur][1]+[(cur, edge[0])]
-                points.put(edge[0])
-    print(12345, dists[destination][1])
-    for e in range(len(dists[destination][1])):
-        dists[destination][1][e] = [refPoints[dists[destination][1][e][0]].pos, refPoints[dists[destination][1][e][1]].pos]
-    return dists[destination][1]
+    if dest in pairToIndex:
+        destination = pairToIndex[dest]
+        #lineSegList = [(closestNode[0], curLocation)]
+        dists = [[99999, []] for i in range(refCount)]
+        dists[pointA] = (hypot(curLocation[0]-refPoints[pointA].pos[0],curLocation[1]-refPoints[pointA].pos[1]), [])
+        dists[pointB] = (hypot(curLocation[0]-refPoints[pointB].pos[0],curLocation[1]-refPoints[pointB].pos[1]), [])
+        points = Queue()
+        points.put(pointA)
+        points.put(pointB)
+        while not points.empty():
+            cur = points.get()
+            for edge in graph[cur]:
+                if dists[edge[0]][0] > dists[cur][0]+edge[1]:
+                    dists[edge[0]][0] = dists[cur][0]+edge[1]
+                    dists[edge[0]][1] = dists[cur][1]+[(cur, edge[0])]
+                    points.put(edge[0])
+        #print(12345, dists[destination][1])
+
+        for w in dists[destination][1]:
+            if pointA in w:
+                z = [pointA, curLocation]
+                break
+            elif pointB in w:
+                z = [pointB, curLocation]
+                break
+        for e in range(len(dists[destination][1])):
+            dists[destination][1][e] = [refPoints[dists[destination][1][e][0]].pos, refPoints[dists[destination][1][e][1]].pos]
+        dists[destination][1].append([curLocation, refPoints[z[0]].pos])
+        return dists[destination][1]
 
 
 
