@@ -6,7 +6,7 @@ import json
 cred = credentials.Certificate('firebase_key.json')
 firebase_admin.initialize_app(cred)
 
-COLLECTION_NAME = 'map'
+COLLECTION_NAME = 'map1'
 
 stuff = firebase_admin.firestore.client(app=None) \
         .collection(COLLECTION_NAME) \

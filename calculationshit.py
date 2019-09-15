@@ -188,7 +188,7 @@ def getPath(dest):
                     dists[edge[0]][1] = dists[cur][1]+[(cur, edge[0])]
                     points.put(edge[0])
         #print(12345, dists[destination][1])
-
+        z = 0
         for w in dists[destination][1]:
             if pointA in w:
                 z = [pointA, curLocation]
@@ -198,7 +198,10 @@ def getPath(dest):
                 break
         for e in range(len(dists[destination][1])):
             dists[destination][1][e] = [refPoints[dists[destination][1][e][0]].pos, refPoints[dists[destination][1][e][1]].pos]
-        dists[destination][1].append([curLocation, refPoints[z[0]].pos])
+        if z != 0:
+            dists[destination][1].append([curLocation, refPoints[z[0]].pos])
+        else:
+            dists[destination][1].append([curLocation, refPoints[destination].pos])
         return dists[destination][1]
 
 

@@ -66,8 +66,9 @@ def get_edges():
 
     good_data = []
 
-    for i in data:
-        good_data.append(data[i])
+    if data:
+        for i in data:
+            good_data.append(data[i])
 
     return good_data
 
