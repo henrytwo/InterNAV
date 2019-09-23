@@ -7,7 +7,7 @@ import copy
 import firebase_admin
 import wifi_manager
 from firebase_admin import credentials
-import calculationshit
+import calculation_manager
 import multiprocessing
 import time as t
 
@@ -23,7 +23,7 @@ def update_position(shared_dict):
         shared_dict['data'] = wifi_manager.dump_aps('wlp0s20f3', 3)
 
 
-def draw_shit(shared_dict):
+def draw_screen(shared_dict):
     def firebase_sync():
         nonlocal last_synced, unsaved_changes
 
@@ -100,7 +100,7 @@ def draw_shit(shared_dict):
     angle = 0
     pos = [0, 0]
 
-    mode = 'viewing'
+    mode = 'data'
 
     # MODES
     # 1 - Viewing map and getting location
@@ -227,7 +227,7 @@ def draw_shit(shared_dict):
                         if e.button == 1 and mode == 'viewing':
                             center(minpoint)
 
-                            navigation_path = calculationshit.getPath(firebase_manager.generate_id(minpoint))
+                            navigation_path = calculation_manager.getPath(firebase_manager.generate_id(minpoint))
                         if e.button == 2:
                             current_edge.append(firebase_manager.generate_id(minpoint))
                             if len(current_edge) == 2:
@@ -268,18 +268,18 @@ def draw_shit(shared_dict):
 
         else:
 
-            keys_shit = key.get_pressed()
+            keys = key.get_pressed()
 
-            if keys_shit[K_1]:
+            if keys[K_1]:
                 mode = 'viewing'
 
                 navigation_path = None
                 view_setup = False
 
-            elif keys_shit[K_2]:
+            elif keys[K_2]:
                 mode = 'data'
 
-            elif keys_shit[K_3]:
+            elif keys[K_3]:
                 mode = 'scanning'
 
                 auto_zoomed = False
@@ -292,31 +292,31 @@ def draw_shit(shared_dict):
                     if 'aps' in to_be_scanned[i]:
                         del to_be_scanned[i]
 
-            elif keys_shit[K_4]:
+            elif keys[K_4]:
                 firebase_sync()
 
-            elif keys_shit[K_5] and mode == 'scanning' and not point_recorded:
+            elif keys[K_5] and mode == 'scanning' and not point_recorded:
                 point_recorded = True
 
                 points[highlighted_point]['aps'] = wifi_manager.dump_aps('wlp0s20f3', 3)
 
                 del to_be_scanned[highlighted_point]
 
-            elif not keys_shit[K_5]:
+            elif not keys[K_5]:
                 point_recorded = False
 
             if mode == 'viewing' and not view_setup:
                 view_setup = True
 
-                calculationshit.Initialize(points, None, None, edges)
+                calculation_manager.Initialize(points, None, None, edges)
 
             if mode == 'viewing':
-                calculatedPosition = calculationshit.findLocation(
+                calculatedPosition = calculation_manager.findLocation(
                     shared_dict['data'] if ('data' in shared_dict) else wifi_manager.dump_aps('wlp0s20f3', 3))
 
 
                 if calculatedPosition != last_position and navigation_path:
-                    navigation_path = calculationshit.getPath(firebase_manager.generate_id(minpoint))
+                    navigation_path = calculation_manager.getPath(firebase_manager.generate_id(minpoint))
 
                     last_position = copy.deepcopy(calculatedPosition)
 
@@ -421,7 +421,7 @@ def draw_shit(shared_dict):
 up = multiprocessing.Process(target=update_position, args=(shared_dict,))
 up.start()
 
-dp = multiprocessing.Process(target=draw_shit, args=(shared_dict,))
+dp = multiprocessing.Process(target=draw_screen, args=(shared_dict,))
 dp.start()
 
 print('Running!')
